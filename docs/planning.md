@@ -10,10 +10,14 @@
 |----------|--------|
 | Who runs it today? | Power user (the builder) |
 | Target operator later | Non-technical PM, onboarded with minimal setup |
-| Business model | Paid product (not open-source hobby) |
+| Business model | Paid product — self-hosted package sold to clients |
 | First user | Builder + PMs managing technical teams below them |
 | WhatsApp staleness threshold | Daily is fine. 2+ days = the team is behind, not the tool |
-| Deployment target | Server / VPS (not user's local machine) |
+| Deployment model | Self-hosted: client runs on their own VPS |
+| Team size per PM | 5–10 field engineers |
+| Projects per PM | Many concurrent projects |
+| Primary market | SEA (Indonesia, Malaysia, Philippines focus) |
+| Pricing | Decide after MVP is built |
 
 ---
 
@@ -21,13 +25,20 @@
 
 These must be answered before finalizing the system design:
 
-1. **SaaS vs. self-hosted product?**
-   Are you hosting it for clients and charging monthly (you own the infra), or selling a package they deploy on their own VPS?
-   > This is the single biggest architectural fork. Multi-tenant shared infra vs. per-client isolated deployments.
+1. **Language of WhatsApp chats?**
+   Bahasa Indonesia, English, or mixed code-switching?
+   > Determines embedding model. nomic-embed-text is English-first and degrades on Bahasa. multilingual-e5-large or paraphrase-multilingual-mpnet-base-v2 would serve SEA teams better.
 
-2. **Team size per PM?**
-   How many people are "below" a typical PM? 5–10 field engineers? 20–50?
-   > Determines whether per-query latency matters or async is acceptable.
+2. **License enforcement mechanism?**
+   Time-limited license key file, phone-home activation, or trust-based (no enforcement for now)?
+   > Self-hosted means clients have the Docker image. Without enforcement, sharing is trivial.
+
+3. **Update delivery method?**
+   How do clients get v1.1 when you ship it?
+   - Option A: `git pull && docker-compose pull` (requires git on server)
+   - Option B: Download new release zip from a URL
+   - Option C: Automatic on container restart (pull policy in docker-compose)
+   > Determines whether you need a release/download infrastructure from day 1.
 
 3. **Projects per PM?**
    One big long-running project, or multiple concurrent projects?
@@ -40,6 +51,50 @@ These must be answered before finalizing the system design:
 5. **Target price point?**
    Rough ballpark per PM per month?
    > Determines how much infra cost you can absorb per client and what tier of GPU makes sense.
+
+---
+
+## Architecture Implications (From Decisions Made)
+
+### Self-hosted changes everything
+
+You are shipping a **deployable package**, not running infra. Consequences:
+
+- `docker-compose up` must work first time, every time — no manual steps
+- JWT secret is generated per-installation (not from a central auth server)
+- No central observability — local logging must be good enough for PM to self-diagnose
+- Data never leaves client's VPS — this is the **core sales argument** for SEA enterprise
+- You need a license key mechanism before first paid client
+- You need an update path before v1.1
+
+### Many projects per PM → Project switcher is Phase 1, not Phase 3
+
+A PM running 8 concurrent projects who can't switch between them in the chat UI won't use the product. ChromaDB collections (one per project) and a project switcher component move to Phase 1.
+
+### SEA market → Multilingual gap in current tech stack
+
+`nomic-embed-text` is English-first. EPC teams in Indonesia code-switch between Bahasa Indonesia and English mid-sentence in WhatsApp. Retrieval quality degrades on Bahasa.
+
+**Recommended swaps:**
+- Embedding: `nomic-embed-text` → `multilingual-e5-large` or `paraphrase-multilingual-mpnet-base-v2`
+- LLM: `Hermes3` → `Qwen2.5-7B` (better multilingual performance across SEA languages, similar VRAM)
+
+Both run via Ollama. This is a model config change, not an architecture change.
+
+### Recommended VPS for SEA clients
+
+| Provider | Region | Spec | Cost/mo | Best for |
+|----------|--------|------|---------|----------|
+| DigitalOcean | Singapore | 16GB RAM, 8 vCPU | ~$96 | Most PM-friendly dashboard |
+| Vultr | Singapore | 16GB RAM, 6 vCPU | ~$80 | Budget-conscious |
+| IDCloudHost | Jakarta | 16GB RAM | ~Rp 600K | Indonesian data residency |
+| Biznet Metro | Jakarta | Configurable | ~Rp 800K+ | Enterprise Indonesian clients |
+
+**Default recommendation**: DigitalOcean Singapore 16GB Droplet. Document this as the official supported spec.
+
+### 5–10 users, many projects → Low concurrent query load
+
+Peak load: ~20–50 queries/day per deployment. A single 16GB VPS running Qwen2.5-7B Q4_K_M can handle this. GPU is not required for Phase 1. If response time is acceptable at 30–60s (async notification UX), CPU-only is viable and keeps client infrastructure cost low.
 
 ---
 
@@ -162,34 +217,37 @@ Charge per project/month. You absorb infra cost, which is ~$50–150/mo per GPU 
 ## Revised Roadmap (Proposed)
 
 ### Phase 1 — Working MVP
-- [ ] WhatsApp `.txt` parser (multi-format: iOS + Android)
+- [ ] WhatsApp `.txt` parser (multi-format: iOS + Android, Bahasa-aware)
 - [ ] PDF + Excel + DOCX ingestion with document-type-aware chunking
 - [ ] Basic P&ID instrument tag extraction (regex-based: AT-201, FT-101 patterns)
-- [ ] ChromaDB with project-scoped collections (multi-tenancy schema from day 1)
-- [ ] Ollama + Hermes3 backend
+- [ ] ChromaDB with project-scoped collections (one collection per project — multi-tenancy from day 1)
+- [ ] Ollama + Qwen2.5-7B (multilingual, better for SEA) + multilingual-e5-large embeddings
 - [ ] FastAPI with JWT auth (carries `project_id` + `role` claims)
-- [ ] Basic React chat UI with source citation panel
+- [ ] React chat UI with source citation panel **and project switcher**
 - [ ] Incremental WhatsApp re-ingestion (hash-based, new messages only)
-- [ ] Docker Compose (includes Ollama, model pull on first run)
-- [ ] Volume-mounted ChromaDB with daily snapshot
+- [ ] Docker Compose (includes Ollama, pulls models on first run, no manual steps)
+- [ ] Volume-mounted ChromaDB with daily snapshot script
+- [ ] `.env.example` with all required config documented
+- [ ] Setup guide targeting DigitalOcean Singapore 16GB as reference spec
 
 ### Phase 2 — Conflict Resolution
-- [ ] Authority level metadata system (configurable per project by PM)
+- [ ] Authority level metadata system (configurable per project by PM, not global)
 - [ ] Conflict detection between chunks (same topic, different claim)
 - [ ] TRUSTED / SUPERSEDED labeling in responses
 - [ ] Document version tracking
-- [ ] Confidence signal definition and display
+- [ ] Confidence signal: defined as cosine similarity of top-k retrieved chunks, displayed in UI
 
 ### Phase 3 — Roles & Intent
 - [ ] User roles: PM, Field Technician, Procurement, Engineer
 - [ ] Intent classifier per role (same question → different answer facets)
 - [ ] Admin panel for users and projects
-- [ ] Async query mode with notification (for CPU-only deployments)
+- [ ] Async query mode with notification (for CPU-only deployments where 30–60s response is expected)
 
 ### Phase 4 — Commercial Layer
+- [ ] License key mechanism (time-limited file or activation)
+- [ ] Update delivery path (defined and documented)
 - [ ] White-label support (logo, color scheme, domain)
 - [ ] Usage dashboard for PM (queries/day, documents indexed, staleness alerts)
-- [ ] Multi-project dashboard
 - [ ] Node-RED flow ingestion
 - [ ] Advanced P&ID parsing (beyond regex, OCR-based)
 
@@ -199,11 +257,16 @@ Charge per project/month. You absorb infra cost, which is ~$50–150/mo per GPU 
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
+| Deployment model | Self-hosted Docker Compose package | Client data stays on their VPS; core SEA sales argument |
 | Multi-tenancy scope | ChromaDB collection per project | Simplest isolation, no cross-project bleed |
 | JWT claims | Must carry `project_id` + `role` | Required for both isolation and intent-aware retrieval |
 | WhatsApp update model | Incremental via UI upload | Daily manual export is acceptable; hash-based dedup makes it low-friction |
 | Authority hierarchy | Configurable per project, not global | Different orgs have different authority structures |
 | Chunking approach | Document-type-specific per parser | Naive chunking breaks structured engineering data |
+| LLM choice | Qwen2.5-7B (replacing Hermes3) | Better multilingual performance for SEA (Bahasa Indonesia, Malay, English mix) |
+| Embedding model | multilingual-e5-large (replacing nomic-embed-text) | nomic-embed-text is English-first; degrades on Bahasa |
+| Project switcher | Phase 1 (moved from Phase 3) | PMs managing many projects need it from day 1 |
+| Reference deployment spec | DigitalOcean Singapore 16GB | Documented as official supported spec for SEA clients |
 
 ---
 
