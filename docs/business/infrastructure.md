@@ -69,7 +69,7 @@ volumes:
 
 On first `docker-compose up`, the `ollama` service automatically pulls:
 - `qwen2.5:7b` — LLM for answer generation
-- `milkey-mouse/multilingual-e5-large` — embedding model
+- `intfloat/multilingual-e5-large` — embedding model
 
 This requires internet access on first run only. Subsequent runs are fully offline.
 
