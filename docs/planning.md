@@ -63,13 +63,10 @@ All decisions with full rationale are in [decisions.md](./decisions.md). Short v
 
 ## Open Questions
 
-5 questions remain unanswered. Full context: [open-questions.md](./open-questions.md)
+2 questions remain unanswered. Full context: [open-questions.md](./open-questions.md)
 
 | # | Question |
 |---|----------|
-| Q1 | WhatsApp language — Bahasa, English, or mixed? |
-| Q2 | Distribution format — zip, Docker Hub, GitHub? |
-| Q3 | One-time vs annual license confirmed? |
 | Q4 | Setup service included as add-on? |
 | Q5 | Buyer: PM personally or company procurement? |
 

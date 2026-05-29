@@ -116,13 +116,10 @@ Full rationale: [decisions.md](./decisions.md)
 
 ## Open Questions (Blocking)
 
-5 questions remain unanswered. See [open-questions.md](./open-questions.md) for full context.
+2 questions remain unanswered. See [open-questions.md](./open-questions.md) for full context.
 
 | # | Question | Blocks |
 |---|----------|--------|
-| Q1 | WhatsApp language (Bahasa / English / mixed)? | Embedding model confirmation |
-| Q2 | Distribution format (zip / Docker Hub / GitHub)? | License enforcement design |
-| Q3 | One-time vs annual license? | Pricing and update model |
 | Q4 | Setup service included? | Onboarding flow design |
 | Q5 | Buyer: PM personally or company procurement? | Payment and sales flow |
 

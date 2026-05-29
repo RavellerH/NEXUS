@@ -275,3 +275,60 @@ Naive sentence or fixed-size chunking breaks table rows mid-row, splits SOP step
 - [modules/ingestion/pdf-parser.md](./modules/ingestion/pdf-parser.md)
 - [modules/ingestion/excel-parser.md](./modules/ingestion/excel-parser.md)
 - [modules/ingestion/docx-parser.md](./modules/ingestion/docx-parser.md)
+
+---
+
+## D12 — WhatsApp Chat Language: Multilingual Code-switching (Bahasa Indonesia & English)
+
+**Status**: Locked
+**Date**: 2026-05-29
+**Phase**: 1
+
+### Decision
+Confirm that target clients' WhatsApp project chats happen in a multilingual format with heavy code-switching between Bahasa Indonesia/Malay and English. 
+
+### Rationale
+This locks in the decision to use the `multilingual-e5-large` embedding model (D04) and ensure the `qwen2.5:7b` LLM (D03) is prompted to understand and synthesize responses across both English and local Southeast Asian dialects. The WhatsApp parser will be written to support this multilingual content from day 1, avoiding subsequent parsing or embedding dimension migrations.
+
+### Related
+- [open-questions.md → Resolved Questions](./open-questions.md)
+- [decisions.md → D03, D04](./decisions.md)
+- [modules/ingestion/whatsapp-parser.md](./modules/ingestion/whatsapp-parser.md)
+
+---
+
+## D13 — Distribution Format: Zip File / Private GitHub Repo
+
+**Status**: Locked
+**Date**: 2026-05-29
+**Phase**: 1 & 4
+
+### Decision
+NEXUS will be distributed via a private GitHub repository for developers and early clients (Phase 1), and as a downloadable ZIP package containing `docker-compose.yml` and default configurations. Private Docker Hub image delivery with automated license checks is deferred to Phase 4.
+
+### Rationale
+Using a zip archive and private GitHub repository minimizes launch and infrastructure overhead for early-stage clients while facilitating extremely rapid update iteration during Phase 1. It allows trust-based adoption initially, with technical IP protection and programmatic validation layers planned for the Phase 4 commercialization push.
+
+### Related
+- [open-questions.md → Resolved Questions](./open-questions.md)
+- [business/model.md](./business/model.md)
+- [todo.md → Phase 4](./todo.md)
+
+---
+
+## D14 — License Pricing Model: Recurring Annual/Monthly Renewal
+
+**Status**: Locked
+**Date**: 2026-05-29
+**Phase**: 4
+
+### Decision
+Lock in a recurring subscription-like license key model (with options for annual or monthly renewals) over a flat one-time purchase.
+
+### Rationale
+A recurring license model mitigates the "revenue cliff" risk, supports ongoing developer maintenance, and aligns well with standard B2B software purchasing cycles expected by company procurement departments in Southeast Asia. Active subscriptions authorize clients to pull future product updates and access support.
+
+### Related
+- [open-questions.md → Resolved Questions](./open-questions.md)
+- [business/model.md](./business/model.md)
+- [critique/business.md](./critique/business.md)

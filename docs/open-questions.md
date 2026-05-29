@@ -26,88 +26,7 @@ related:
 
 ---
 
-## Q1 — WhatsApp Chat Language
 
-**Status**: 🔴 Blocking
-**Priority**: High
-**Blocks**: Embedding model confirmation, WhatsApp parser language handling
-
-### Question
-Do the target clients' WhatsApp project chats happen in Bahasa Indonesia, English, or mixed code-switching between both?
-
-### Why it matters
-The current README specifies `nomic-embed-text` for embeddings. That model is English-first and degrades significantly on Bahasa Indonesia text. If clients write in Bahasa (or code-switch), retrieval quality for the most important knowledge source (WhatsApp) will be poor.
-
-### Options
-- **Bahasa or mixed** → swap to `multilingual-e5-large` now, before building the ingestion pipeline
-- **English only** → `nomic-embed-text` is fine, no change needed
-- **Mixed** → `multilingual-e5-large` is still the right choice; it handles English equally well
-
-### Recommended default
-Swap to `multilingual-e5-large` regardless. SEA EPC teams almost universally code-switch. The cost of swapping later (after ingestion pipeline is built around a specific embedding dimension) is high.
-
-### Related
-- [decisions.md → LLM & Embedding](./decisions.md)
-- [modules/ingestion/whatsapp-parser.md](./modules/ingestion/whatsapp-parser.md)
-- [business/market.md](./business/market.md)
-
----
-
-## Q2 — Distribution Format
-
-**Status**: 🔴 Blocking
-**Priority**: High
-**Blocks**: License enforcement design, update delivery mechanism
-
-### Question
-What does a buyer actually receive when they purchase NEXUS?
-
-### Options
-
-| Option | Description | Pros | Cons |
-|--------|-------------|------|------|
-| A: Zip file | Downloadable archive with docker-compose + configs | Simple, no infra needed | Easy to share/pirate; hard to revoke |
-| B: Private Docker Hub image | Pulled via authenticated registry with license-tied credentials | Access revocable; update via `docker pull` | Requires Docker Hub org (~$9/mo); build pipeline needed |
-| C: Private GitHub repo | Client clones repo; updates via `git pull` | Free; easy updates; git history visible | Client has source access; harder to protect IP |
-| D: Hybrid | Public repo + private config/license layer | Flexible | More complex |
-
-### Recommended
-**Option B (private Docker Hub image)** for Phase 4+ (when license enforcement matters).
-**Option C (private GitHub repo)** for Phase 1 and early clients — simpler, enables faster iteration, trust-based for now.
-
-### Related
-- [decisions.md](./decisions.md)
-- [business/model.md](./business/model.md)
-- [todo.md → Phase 4](./todo.md)
-
----
-
-## Q3 — One-Time vs Annual License
-
-**Status**: 🔴 Blocking
-**Priority**: High
-**Blocks**: Pricing structure, update delivery model, sales messaging
-
-### Question
-Is the license a one-time purchase or an annual renewable license?
-
-### The problem with one-time
-- Revenue cliff after launch
-- No clean answer for how buyers get future updates
-- No incentive to communicate value to existing clients
-- Solo founder doing ongoing work for a one-time fee
-
-### Recommended model: Annual license
-- Client pays once → gets license key valid for 12 months
-- Key enables the product and unlocks updates for that period
-- After 12 months: renew to keep getting updates; product keeps working on current version without renewal
-- Tiering later: Solo PM / Team / Agency
-
-### Related
-- [business/model.md](./business/model.md)
-- [critique/business.md](./critique/business.md)
-
----
 
 ## Q4 — Setup Service
 
@@ -178,3 +97,6 @@ Design for **company buyer** (invoice + transfer). Most EPC PMs in Indonesia wil
 | Deployment target? | Client's own VPS | 2026-05-29 |
 | WhatsApp staleness tolerance? | Daily is fine; 2+ days = team issue | 2026-05-29 |
 | Distribution model? | Digital product (deployable package) | 2026-05-29 |
+| WhatsApp Chat Language | Multilingual (code-switching between Bahasa & English) | 2026-05-29 |
+| Distribution Format | Shipping a zip file / Private GitHub repo | 2026-05-29 |
+| License Pricing Model | Recurring annual/monthly renewal | 2026-05-29 |
