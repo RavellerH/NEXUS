@@ -3,230 +3,418 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXUS — Dev Dashboard</title>
+  <title>NEXUS — AI Context Engine for EPC Teams</title>
+  <meta name="description" content="NEXUS indexes your project's WhatsApp chats, PDFs, SOPs, and BOMs — then answers questions with citations. Self-hosted, built for Southeast Asia.">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="landing">
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <h1>NEXUS</h1>
-    <p>AI Context Engine for EPC</p>
-    <span class="sidebar-badge">Pre-Implementation</span>
+<!-- Top nav -->
+<nav class="top-nav">
+  <div class="top-nav-logo">
+    NEXUS
+    <span class="badge badge-blue" style="font-size: 10px;">Building in public</span>
   </div>
-  <nav>
-    <div class="nav-section">Overview</div>
-    <a href="index.html" class="active"><span class="icon">⬛</span> Dashboard</a>
-    <a href="roadmap.html"><span class="icon">🗺</span> Roadmap</a>
-    <div class="nav-section">Technical</div>
-    <a href="architecture.html"><span class="icon">🏗</span> Architecture</a>
-    <a href="decisions.html"><span class="icon">🔒</span> Decisions</a>
-    <div class="nav-section">Tracking</div>
-    <a href="tracking.html"><span class="icon">🐛</span> Bugs &amp; Questions</a>
-    <a href="audit.html"><span class="icon">🔍</span> Audit</a>
-  </nav>
-  <div class="sidebar-footer">
-    Last updated: 2026-05-29
+  <div class="top-nav-links">
+    <a href="roadmap.html">Roadmap</a>
+    <a href="architecture.html">Architecture</a>
+    <a href="decisions.html">Decisions</a>
+    <a href="tracking.html">Issues</a>
+    <a href="audit.html">Audit</a>
   </div>
-</aside>
+</nav>
 
-<main class="main">
-  <div class="page-header">
-    <h1>Development Dashboard</h1>
-    <p>Live status monitor for NEXUS — self-hosted AI context engine for EPC engineering teams.</p>
-  </div>
-
-  <div class="cards cards-4">
-    <div class="card blue">
-      <h2>Current Phase</h2>
-      <div class="value">1 / 4</div>
-      <div class="sub">Working MVP — not started</div>
-    </div>
-    <div class="card green">
-      <h2>Decisions Locked</h2>
-      <div class="value">14</div>
-      <div class="sub">D01–D14 confirmed</div>
-    </div>
-    <div class="card yellow">
-      <h2>Open Questions</h2>
-      <div class="value">2</div>
-      <div class="sub">Q4 setup service · Q5 buyer type</div>
-    </div>
-    <div class="card red">
-      <h2>Known Bugs</h2>
-      <div class="value">3</div>
-      <div class="sub">PRE-001 · PRE-002 · PRE-003</div>
-    </div>
+<!-- Hero -->
+<section class="lsection narrow" style="padding-top: 96px; padding-bottom: 64px;">
+  <div class="hero-eyebrow">For EPC engineering teams in Southeast Asia</div>
+  <h1 class="hero-headline">
+    Your project's institutional memory.<br>
+    <span class="accent">Finally searchable.</span>
+  </h1>
+  <p class="hero-sub">
+    EPC teams run on WhatsApp threads, PDF stacks, Excel BOMs, and DOCX SOPs.
+    The knowledge is there. Finding it costs hours. NEXUS indexes everything and
+    answers questions with citations — in English or Bahasa Indonesia.
+  </p>
+  <div class="hero-tags">
+    <span class="badge badge-gray">Self-hosted</span>
+    <span class="badge badge-gray">No cloud. No data leaks.</span>
+    <span class="badge badge-gray">Runs on your own VPS</span>
+    <span class="badge badge-gray">Bahasa Indonesia + English</span>
+    <span class="badge badge-gray">Annual license</span>
   </div>
 
-  <div class="cards cards-4">
-    <div class="card red">
-      <h2>Audit — Critical</h2>
-      <div class="value">5</div>
-      <div class="sub">Must fix before coding</div>
+  <div class="status-bar">
+    <div class="status-item">
+      <div class="status-dot green"></div>
+      <span><strong>Specs complete</strong> — 24 docs, 14 architecture decisions locked</span>
     </div>
-    <div class="card orange">
-      <h2>Audit — High</h2>
-      <div class="value">14</div>
-      <div class="sub">Fix before first demo</div>
+    <div class="status-item">
+      <div class="status-dot yellow"></div>
+      <span><strong>Phase 1 implementation</strong> — starting</span>
     </div>
-    <div class="card yellow">
-      <h2>Audit — Medium</h2>
-      <div class="value">10</div>
-      <div class="sub">Fix before first client</div>
-    </div>
-    <div class="card green">
-      <h2>Audit — Low</h2>
-      <div class="value">5</div>
-      <div class="sub">Cosmetic / nice-to-have</div>
+    <div class="status-item">
+      <div class="status-dot gray"></div>
+      <span><strong>First client</strong> — after MVP</span>
     </div>
   </div>
+</section>
 
-  <div class="section">
-    <h2>Current State</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Area</th>
-            <th>Status</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Documentation</td>
-            <td><span class="badge badge-green">Complete</span></td>
-            <td>24 spec files, decision log, bug tracker, audit reports</td>
-          </tr>
-          <tr>
-            <td>Architecture Decisions</td>
-            <td><span class="badge badge-green">Locked</span></td>
-            <td>14 decisions confirmed. 2 open questions remain.</td>
-          </tr>
-          <tr>
-            <td>Backend — Ingestion</td>
-            <td><span class="badge badge-gray">Not started</span></td>
-            <td>Specs: whatsapp, pdf, excel, docx, pid parsers ready</td>
-          </tr>
-          <tr>
-            <td>Backend — Context Store</td>
-            <td><span class="badge badge-gray">Not started</span></td>
-            <td>Hybrid ChromaDB + SQLite FTS5 design locked</td>
-          </tr>
-          <tr>
-            <td>Backend — Query Engine</td>
-            <td><span class="badge badge-gray">Not started</span></td>
-            <td>hybrid_query() routing spec complete</td>
-          </tr>
-          <tr>
-            <td>Backend — API</td>
-            <td><span class="badge badge-gray">Not started</span></td>
-            <td>FastAPI routes spec written; error contracts pending (C03)</td>
-          </tr>
-          <tr>
-            <td>Frontend</td>
-            <td><span class="badge badge-gray">Not started</span></td>
-            <td>React + Tailwind; project switcher required Phase 1</td>
-          </tr>
-          <tr>
-            <td>Infrastructure</td>
-            <td><span class="badge badge-gray">Not started</span></td>
-            <td>docker-compose.yml not written yet (M07 open)</td>
-          </tr>
-          <tr>
-            <td>Tests</td>
-            <td><span class="badge badge-gray">Not started</span></td>
-            <td>No test tasks in todo (H10 audit finding)</td>
-          </tr>
-          <tr>
-            <td>License Key System</td>
-            <td><span class="badge badge-purple">Phase 4</span></td>
-            <td>Annual renewal model decided (D02/D14). Implementation deferred.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+<hr class="ldivider">
 
-  <div class="section">
-    <h2>Phase 1 MVP Scope</h2>
-    <p style="color: var(--muted); margin-bottom: 16px; font-size: 13px;">Goal: A working local deployment a power-user PM can run on a real project. PM can upload docs, ask questions, get cited answers, switch between projects.</p>
+<!-- Problem -->
+<section class="lsection">
+  <div class="lsection-label">The problem</div>
+  <h2 class="lsection-headline">The knowledge exists. It just can't be found.</h2>
+  <p class="lsection-sub">
+    A typical EPC project generates thousands of messages, dozens of documents, and hundreds of decisions.
+    They live in different places with no common thread. Every question becomes a search expedition.
+  </p>
 
-    <div class="cards cards-3">
-      <div class="card">
-        <h2>Deployment Stack</h2>
-        <div style="font-size: 13px; margin-top: 8px;">
-          <div style="margin-bottom: 6px;"><code>FastAPI</code> backend</div>
-          <div style="margin-bottom: 6px;"><code>ChromaDB</code> vector store</div>
-          <div style="margin-bottom: 6px;"><code>Ollama</code> — Qwen2.5-7B + multilingual-e5-large</div>
-          <div style="margin-bottom: 6px;"><code>SQLite FTS5</code> hybrid exact index</div>
-          <div><code>React</code> + Tailwind frontend</div>
-        </div>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="q">"What's the operating pressure spec for AT-201?"</div>
+      <div class="a">
+        Check the P&ID. Check the datasheet. Check the WhatsApp group where the vendor replied.
+        Check the ECO from two months ago that superseded the original spec.
+        Give up and ask the site engineer directly.
       </div>
-      <div class="card">
-        <h2>Target Hardware</h2>
-        <div style="font-size: 13px; margin-top: 8px;">
-          <div style="margin-bottom: 6px;">DigitalOcean Singapore</div>
-          <div style="margin-bottom: 6px;"><strong>16 GB RAM</strong> · 8 vCPU</div>
-          <div style="margin-bottom: 6px;">~$96 USD / month</div>
-          <div style="color: var(--muted);">Two deploy paths: online + offline/air-gapped</div>
-        </div>
+    </div>
+    <div class="problem-card">
+      <div class="q">"What did we decide about the pump vendor last March?"</div>
+      <div class="a">
+        Scroll through 3,000 messages in the procurement group chat.
+        The person who made the call left the project. Their reasoning went with them.
       </div>
-      <div class="card">
-        <h2>Primary Market</h2>
-        <div style="font-size: 13px; margin-top: 8px;">
-          <div style="margin-bottom: 6px;">SEA EPC teams</div>
-          <div style="margin-bottom: 6px;">Indonesia · Malaysia · Philippines</div>
-          <div style="margin-bottom: 6px;">Bahasa + English code-switching</div>
-          <div style="color: var(--muted);">5–10 field engineers per PM</div>
-        </div>
+    </div>
+    <div class="problem-card">
+      <div class="q">"Does the SOP match what the site team actually does?"</div>
+      <div class="a">
+        The SOP is v2. The site team is working off a WhatsApp message that updated it.
+        Nobody knows if the update was ever formalized. Both versions exist simultaneously.
       </div>
     </div>
   </div>
+</section>
 
-  <div class="section">
-    <h2>Key Decisions at a Glance</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Decision</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>D01</code></td><td>Self-hosted Docker Compose (not SaaS)</td><td><span class="badge badge-green">Locked</span></td></tr>
-          <tr><td><code>D02</code></td><td>Annual license key business model</td><td><span class="badge badge-yellow">Pending confirm</span></td></tr>
-          <tr><td><code>D03</code></td><td>LLM: Qwen2.5-7B via Ollama</td><td><span class="badge badge-green">Locked</span></td></tr>
-          <tr><td><code>D04</code></td><td>Embeddings: multilingual-e5-large (1024d)</td><td><span class="badge badge-green">Locked</span></td></tr>
-          <tr><td><code>D05</code></td><td>One ChromaDB collection per project</td><td><span class="badge badge-green">Locked</span></td></tr>
-          <tr><td><code>D08</code></td><td>Project switcher in Phase 1 (not Phase 3)</td><td><span class="badge badge-green">Locked</span></td></tr>
-          <tr><td><code>D09</code></td><td>P&amp;ID tag extraction in Phase 1 (regex)</td><td><span class="badge badge-green">Locked</span></td></tr>
-          <tr><td><code>D11</code></td><td>Document-type-specific chunking per parser</td><td><span class="badge badge-green">Locked</span></td></tr>
-        </tbody>
-      </table>
+<hr class="ldivider">
+
+<!-- Solution -->
+<section class="lsection">
+  <div class="lsection-label">The solution</div>
+  <h2 class="lsection-headline">One place that knows your project.</h2>
+  <p class="lsection-sub">
+    NEXUS ingests your project's documents and chats, indexes them with context, and answers questions with citations
+    — pointing you to the exact source: which document, which page, which message, which author.
+  </p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>Upload your documents</h4>
+      <p>Drag and drop everything — all formats supported out of the box.</p>
+      <div class="file-types">
+        <span class="badge badge-gray">WhatsApp .txt</span>
+        <span class="badge badge-gray">PDF</span>
+        <span class="badge badge-gray">Excel BOM</span>
+        <span class="badge badge-gray">DOCX SOP</span>
+        <span class="badge badge-gray">P&amp;ID drawing</span>
+      </div>
     </div>
-    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Full decision log → <a href="decisions.html" style="color: var(--blue);">decisions.html</a></p>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>Ask a question</h4>
+      <p>Natural language — in English, Bahasa Indonesia, or a mix of both. Exact instrument tags work too.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>Get a cited answer</h4>
+      <p>Every answer shows the source document, page or message, timestamp, author, and authority level.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="ldivider">
+
+<!-- Features -->
+<section class="lsection wide">
+  <div style="max-width: 820px; margin: 0 auto 32px;">
+    <div class="lsection-label">Features</div>
+    <h2 class="lsection-headline">Built for how EPC teams actually work.</h2>
+    <p class="lsection-sub" style="margin-bottom: 0;">Not a generic document chatbot. Every decision in NEXUS was made with EPC project realities in mind.</p>
   </div>
 
-  <div class="section">
-    <h2>Blocking Audit Items</h2>
-    <div class="alert"><strong>Action required</strong> — 5 critical issues must be resolved before any Phase 1 code is written.</div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Issue</th><th>Severity</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>C01</code></td><td>Wrong embedding model name — <strong>Fixed</strong></td><td><span class="badge badge-green">Fixed</span></td></tr>
-          <tr><td><code>C02</code></td><td>3 module specs missing (ingestion-pipeline, metadata-tagger, chunker)</td><td><span class="badge badge-red">Critical</span></td></tr>
-          <tr><td><code>C03</code></td><td>API error response contract not defined</td><td><span class="badge badge-red">Critical</span></td></tr>
-          <tr><td><code>C04</code></td><td>JWT token lifecycle unspecified (TTL, logout, revocation)</td><td><span class="badge badge-red">Critical</span></td></tr>
-          <tr><td><code>C05</code></td><td>No ingestion error handling strategy</td><td><span class="badge badge-red">Critical</span></td></tr>
-        </tbody>
-      </table>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="ficon">🔒</div>
+      <h4>Self-hosted. Your data stays yours.</h4>
+      <p>Runs on your own VPS via Docker Compose. No data sent to any cloud. Designed for clients who can't use SaaS tools on site.</p>
+      <div class="phase-tag"><span class="badge badge-blue">Phase 1</span></div>
     </div>
-    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Full audit → <a href="audit.html" style="color: var(--blue);">audit.html</a></p>
+    <div class="feature-card">
+      <div class="ficon">🌏</div>
+      <h4>Bahasa Indonesia + English, natively.</h4>
+      <p>Most EPC WhatsApp chats code-switch between Bahasa and English mid-sentence. NEXUS was built with a multilingual embedding model from day one.</p>
+      <div class="phase-tag"><span class="badge badge-blue">Phase 1</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="ficon">🎯</div>
+      <h4>Instrument tags that actually work.</h4>
+      <p>Dense AI embeddings can't tell AT-201 from AT-202. NEXUS uses a hybrid exact-match index so instrument tags, part numbers, and PO numbers return precise results.</p>
+      <div class="phase-tag"><span class="badge badge-blue">Phase 1</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="ficon">📁</div>
+      <h4>Multi-project from day one.</h4>
+      <p>A PM managing 8 concurrent projects can't wait for Phase 3. Switch between project contexts in one click — each project's knowledge is fully isolated.</p>
+      <div class="phase-tag"><span class="badge badge-blue">Phase 1</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="ficon">⚖️</div>
+      <h4>Conflict detection with authority ranking.</h4>
+      <p>When a WhatsApp message contradicts a signed ECO, NEXUS surfaces both with labels: TRUSTED and SUPERSEDED. You see the conflict, not just one answer.</p>
+      <div class="phase-tag"><span class="badge badge-purple">Phase 2</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="ficon">🧑‍🔧</div>
+      <h4>Role-aware answers.</h4>
+      <p>A procurement engineer and a field technician asking the same question get different facets of the answer — part number + lead time vs. diameter + hazard rating.</p>
+      <div class="phase-tag"><span class="badge badge-gray">Phase 3</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="ficon">✈️</div>
+      <h4>Works air-gapped.</h4>
+      <p>Industrial sites and refineries often have no outbound internet. NEXUS ships with an offline bootstrap path — all models pre-packaged for transfer.</p>
+      <div class="phase-tag"><span class="badge badge-blue">Phase 1</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="ficon">📋</div>
+      <h4>Document-aware chunking.</h4>
+      <p>A BOM row must stay with its column headers. An SOP step must stay complete. Each document type gets a chunking strategy that preserves its structure.</p>
+      <div class="phase-tag"><span class="badge badge-blue">Phase 1</span></div>
+    </div>
+    <div class="feature-card">
+      <div class="ficon">🔑</div>
+      <h4>Annual license. You own the installation.</h4>
+      <p>Not a monthly SaaS subscription. Buy an annual license, deploy it, use it. The installation is yours. Non-renewing clients keep their current version running.</p>
+      <div class="phase-tag"><span class="badge badge-gray">Phase 4</span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="ldivider">
+
+<!-- Build progress -->
+<section class="lsection">
+  <div class="lsection-label">Build progress</div>
+  <h2 class="lsection-headline">Building this in public.</h2>
+  <p class="lsection-sub">
+    Four phases from working MVP to commercial launch. Here's where things stand.
+  </p>
+
+  <div class="phase-list">
+    <div class="phase-row current">
+      <div class="phase-num">Phase 1</div>
+      <div>
+        <h4>Working MVP — <span style="color: var(--blue);">In progress</span></h4>
+        <div class="phase-desc">A working local deployment a power-user PM can run on a real project. Upload docs, ask questions, get cited answers, switch between projects.</div>
+        <div class="phase-items">
+          <span class="badge badge-green">14 decisions locked</span>
+          <span class="badge badge-green">24 spec docs written</span>
+          <span class="badge badge-green">Architecture finalized</span>
+          <span class="badge badge-yellow">Implementation starting</span>
+          <span class="badge badge-gray">Tests pending</span>
+          <span class="badge badge-gray">First deployment pending</span>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-blue">Now</span>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-num">Phase 2</div>
+      <div>
+        <h4>Conflict Resolution</h4>
+        <div class="phase-desc">NEXUS detects when two sources contradict each other and surfaces both with authority labels. TRUSTED / SUPERSEDED on every conflicting answer.</div>
+        <div class="phase-items">
+          <span class="badge badge-gray">authority_ranker.py spec ready</span>
+          <span class="badge badge-gray">conflict_resolver.py spec ready</span>
+          <span class="badge badge-gray">Implementation pending</span>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-gray">After MVP</span>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-num">Phase 3</div>
+      <div>
+        <h4>Roles &amp; Intent</h4>
+        <div class="phase-desc">Same question, different roles, different answers. Procurement sees specs + lead time. Field tech sees installation + hazard. Intent detection built on top of the query engine.</div>
+        <div class="phase-items">
+          <span class="badge badge-gray">intent_detector.py spec ready</span>
+          <span class="badge badge-gray">Role-aware retrieval spec ready</span>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-gray">Post Phase 2</span>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-num">Phase 4</div>
+      <div>
+        <h4>Commercial Launch</h4>
+        <div class="phase-desc">License key mechanism, update delivery, white-labeling, PM usage dashboard, annual license pricing for SEA EPC firms.</div>
+        <div class="phase-items">
+          <span class="badge badge-gray">Business model decided (D02/D14)</span>
+          <span class="badge badge-gray">Tiering defined</span>
+          <span class="badge badge-gray">Implementation deferred</span>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-gray">Future</span>
+      </div>
+    </div>
   </div>
 
-</main>
+  <div style="margin-top: 16px; font-size: 12px; color: var(--muted);">
+    Full task breakdown → <a href="roadmap.html" style="color: var(--blue);">roadmap.html</a>
+  </div>
+</section>
+
+<hr class="ldivider">
+
+<!-- Who it's for -->
+<section class="lsection narrow">
+  <div class="lsection-label">Who it's for</div>
+  <h2 class="lsection-headline">Built for the EPC project manager.</h2>
+
+  <div class="cards cards-2" style="margin-top: 0;">
+    <div class="card" style="border-left: 3px solid var(--green);">
+      <h2>The right fit</h2>
+      <ul style="list-style: none; font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 2;">
+        <li>✓ &nbsp;EPC project manager in Indonesia, Malaysia, or Philippines</li>
+        <li>✓ &nbsp;Managing 5–10 field engineers across 1–8 concurrent projects</li>
+        <li>✓ &nbsp;Team communicates on WhatsApp — mixed Bahasa + English</li>
+        <li>✓ &nbsp;Project has P&amp;IDs, BOMs, SOPs, vendor datasheets</li>
+        <li>✓ &nbsp;Comfortable deploying on a DigitalOcean VPS (or has someone who is)</li>
+        <li>✓ &nbsp;Company buys software via invoice + bank transfer</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--border);">
+      <h2>Not the right fit (yet)</h2>
+      <ul style="list-style: none; font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 2;">
+        <li>✗ &nbsp;Need a managed SaaS — NEXUS is self-hosted only</li>
+        <li>✗ &nbsp;Team communicates in English only — works, but overkill</li>
+        <li>✗ &nbsp;Documents are all scanned image PDFs — Phase 4 OCR</li>
+        <li>✗ &nbsp;Need multi-region deployment — single VPS for now</li>
+        <li>✗ &nbsp;Need a mobile app — web only</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="ldivider">
+
+<!-- Tech brief -->
+<section class="lsection narrow">
+  <div class="lsection-label">Under the hood</div>
+  <h2 class="lsection-headline">Real technology, honest tradeoffs.</h2>
+  <p class="lsection-sub">Not a wrapper around OpenAI. Fully self-contained. Every model runs on your hardware.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Component</th><th>Technology</th><th>Why</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>LLM</td>
+          <td><code>Qwen2.5-7B</code> via Ollama</td>
+          <td>Best SEA multilingual performance in the 7B class. ~5 GB. Runs on 16 GB VPS.</td>
+        </tr>
+        <tr>
+          <td>Embeddings</td>
+          <td><code>multilingual-e5-large</code></td>
+          <td>Handles Bahasa Indonesia, Malay, Filipino, and English equally. 1024 dimensions.</td>
+        </tr>
+        <tr>
+          <td>Vector store</td>
+          <td>ChromaDB</td>
+          <td>One collection per project. Semantic search. Fully local.</td>
+        </tr>
+        <tr>
+          <td>Exact search</td>
+          <td>SQLite FTS5</td>
+          <td>Alphanumeric tag precision. AT-201 ≠ AT-202. No extra service required.</td>
+        </tr>
+        <tr>
+          <td>Backend</td>
+          <td>FastAPI + Python</td>
+          <td>REST API, JWT auth, background ingestion tasks.</td>
+        </tr>
+        <tr>
+          <td>Frontend</td>
+          <td>React + Tailwind CSS</td>
+          <td>Chat UI, project switcher, upload zone, citation panel.</td>
+        </tr>
+        <tr>
+          <td>Deployment</td>
+          <td>Docker Compose</td>
+          <td>One command to start. Named volumes for data persistence. Air-gapped path available.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top: 12px; font-size: 12px; color: var(--muted);">Reference hardware: DigitalOcean Singapore · 16 GB RAM · 8 vCPU · ~$96 USD/month</div>
+</section>
+
+<hr class="ldivider">
+
+<!-- Founder note -->
+<section class="lsection narrow">
+  <div class="lsection-label">Why this exists</div>
+  <h2 class="lsection-headline">A note from the builder.</h2>
+
+  <div class="founder-note">
+    <p>
+      EPC projects in Southeast Asia run on institutional knowledge that lives entirely in informal channels.
+      The official documents are always 2 weeks behind the real decisions, which happened in a WhatsApp group at 11pm.
+      When a field engineer asks a question that was answered 3 months ago, nobody can find it, so they ask again —
+      and the PM answers from memory, which may or may not match the actual spec.
+    </p>
+    <p>
+      NEXUS is my attempt to solve that problem without asking a client to trust their sensitive project data to a cloud service.
+      It runs on their own hardware, in their own network, and it never phones home.
+      No subscription dashboard watching their usage. No risk of a provider going dark and taking their data with them.
+    </p>
+    <p>
+      I'm building this in public. The full architecture, all design decisions, the audit findings —
+      everything is documented in the links below. If you're an EPC PM in SEA and this sounds like
+      your problem, reach out. I'm looking for early feedback from real teams.
+    </p>
+    <div class="sig">Farhan Budiman <span>— Building NEXUS · 2026</span></div>
+  </div>
+</section>
+
+<!-- Footer with links to technical docs -->
+<footer class="docs-footer">
+  <div class="docs-footer-inner">
+    <div style="font-size: 12px; color: var(--muted);">
+      <strong style="color: var(--text);">NEXUS</strong> — Technical documentation
+    </div>
+    <div class="docs-footer-links">
+      <a href="roadmap.html">Roadmap</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="decisions.html">Decision Log</a>
+      <a href="tracking.html">Bugs &amp; Questions</a>
+      <a href="audit.html">Audit Report</a>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
