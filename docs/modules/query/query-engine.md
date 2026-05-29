@@ -52,29 +52,29 @@ class QueryResult:
 
 ```mermaid
 graph TD
-    Q[User query] --> TAG[Tag detection\nregex on query text]
-    Q --> SEM[Semantic search\nvector store]
-    TAG --> MERGE[Merge + deduplicate results]
+    Q[User query] --> ROUTE{Contains alphanumeric\ntag or code?}
+    ROUTE -->|YES| FTS[SQLite FTS5\nexact search]
+    ROUTE -->|NO| SEM[ChromaDB\nsemantic search]
+    FTS --> MERGE[Merge + deduplicate]
     SEM --> MERGE
     MERGE --> RB[response-builder]
 ```
 
-### Step 1: Tag detection in query
+### Step 1: Route the query
 
-Check if the query contains instrument tag patterns (AT-201, FT-101, etc.).
+`VectorStore.hybrid_query()` handles routing automatically. The decision is based on whether the query contains an alphanumeric pattern matching instrument tags, part numbers, or reference codes (e.g. `AT-201`, `CBL-001-HV`, `PO-2024-003`).
 
-If tags found:
-- Run `VectorStore.query_by_tag(tag)` for each detected tag (exact match on metadata)
-- Merge tag-matched chunks with semantic search results
-- Tag-matched chunks get a retrieval boost (rank near top)
+- **Alphanumeric detected → FTS5 path**: 100% precision on exact identifiers. Dense embeddings cannot reliably distinguish `AT-201` from `AT-202` — FTS5 can.
+- **Natural language → semantic path**: ChromaDB embedding search using `multilingual-e5-large`.
 
-### Step 2: Semantic search
+### Step 2: Retrieve
 
-Embed the query using the same `multilingual-e5-large` model used at ingestion. Query the active project's ChromaDB collection for top-k results.
+- **FTS5**: `VectorStore.fts_search(query_text)` — SQLite FTS5 full-text match against `instrument_tags` and `part_numbers` fields
+- **Semantic**: `VectorStore.query(query_text, n_results)` — embed query, find top-k cosine-similar chunks in ChromaDB
 
 ### Step 3: Merge and deduplicate
 
-Combine tag-matched and semantic results. Remove duplicates by `chunk_id`. Return unified list.
+Combine results from both paths. Remove duplicates by `chunk_id`. FTS5-matched chunks rank above semantic-only matches in the merged list.
 
 ---
 

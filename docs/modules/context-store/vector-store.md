@@ -31,6 +31,7 @@ ChromaDB wrapper. Manages creation, querying, and deletion of per-project collec
 - **One collection per project** — see [decisions.md D05](../../decisions.md)
 - **Embedding model: multilingual-e5-large** — see [decisions.md D04](../../decisions.md)
 - **Embedding dimension: 1024** — fixed from day 1; cannot be changed without full re-ingestion
+- **Hybrid retrieval: ChromaDB (semantic) + SQLite FTS5 (exact)** — see Hybrid Index section below
 
 ---
 
@@ -96,13 +97,92 @@ class VectorStore:
 
 ---
 
+## Hybrid Index: ChromaDB + SQLite FTS5
+
+> **Why this matters**: Dense embeddings (`multilingual-e5-large`) compress semantic meaning but are unreliable for exact alphanumeric identifiers. `AT-201` and `AT-202` produce nearly identical embedding vectors. A query for "AT-201 pressure spec" may retrieve chunks about AT-202 with higher confidence than the correct AT-201 chunk. The same problem applies to part numbers (`CBL-001-HV-4` vs `CBL-001-HV-3`), PO numbers, and document reference codes.
+
+### Architecture
+
+Two parallel indexes, one query router:
+
+```
+User query
+    │
+    ├── Contains alphanumeric tag/code?  (regex detection)
+    │       │
+    │       YES → SQLite FTS5 exact search  →  100% precision results
+    │       │         (instrument tags, part numbers, PO numbers)
+    │       │
+    │       NO  → ChromaDB semantic search  →  top-k semantic results
+    │
+    └── Merge + deduplicate → response builder
+```
+
+### SQLite FTS5 schema
+
+```sql
+-- One database per project: /app/data/fts/nexus_project_{project_id}.db
+CREATE VIRTUAL TABLE chunks_fts USING fts5(
+    chunk_id,       -- FK to ChromaDB chunk
+    content,        -- Full text for FTS search
+    instrument_tags,-- Space-separated tag list: "AT-201 FT-101 PV-305"
+    part_numbers,   -- Extracted part/PO numbers
+    source_file,
+    tokenize = "unicode61 remove_diacritics 1"
+);
+```
+
+### Query routing logic
+
+```python
+EXACT_PATTERN = re.compile(r'\b[A-Z]{1,4}-\d{3,4}[A-Z]?\b|\bCBL-\w+\b|\bPO-\d+\b')
+
+def route_query(query_text: str) -> str:
+    if EXACT_PATTERN.search(query_text):
+        return "fts"   # precision-first
+    return "semantic"  # recall-first
+```
+
+### Interface additions
+
+```python
+class VectorStore:
+    # ... existing methods ...
+
+    def fts_search(
+        self,
+        query_text: str,
+        n_results: int = 10,
+    ) -> list[RetrievedChunk]:
+        """SQLite FTS5 full-text search. Used for exact alphanumeric queries."""
+
+    def hybrid_query(
+        self,
+        query_text: str,
+        n_results: int = 10,
+    ) -> list[RetrievedChunk]:
+        """Routes to FTS5 or semantic search based on query content. Preferred entry point."""
+```
+
+### Storage
+
+- FTS5 database: `/app/data/fts/nexus_project_{project_id}.db`
+- Docker volume mount: `nexus_fts:/app/data/fts`
+- SQLite is included in Python stdlib — no additional service required
+- FTS5 index is rebuilt from ChromaDB chunks on first run; kept in sync by `upsert()`
+
+---
+
 ## Persistence
 
 - ChromaDB data directory: `/app/data/chromadb/` (inside container)
-- Docker volume mount: `nexus_chromadb:/app/data/chromadb`
-- Named volume prevents accidental deletion on `docker-compose down`
+- FTS5 database directory: `/app/data/fts/` (inside container)
+- Docker volume mounts:
+  - `nexus_chromadb:/app/data/chromadb`
+  - `nexus_fts:/app/data/fts`
+- Named volumes prevent accidental deletion on `docker-compose down`
 
-**Snapshot**: daily cron job tars `/app/data/chromadb/` to `/app/data/backups/chromadb_YYYY-MM-DD.tar.gz`
+**Snapshot**: daily cron job tars both `/app/data/chromadb/` and `/app/data/fts/` to `/app/data/backups/`
 
 See [bugs.md PRE-002](../../bugs.md) (dimension lock-in) and [PRE-003](../../bugs.md) (volume loss risk).
 
