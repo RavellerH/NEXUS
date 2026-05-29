@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# NEXUS Local Development DB & Data Stores
+data/
+chroma_db/
+*.db
+*.sqlite*
