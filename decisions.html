@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Decisions</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Pre-Implementation</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html"><span class="icon">⬛</span> Dashboard</a>
+    <a href="roadmap.html"><span class="icon">🗺</span> Roadmap</a>
+    <div class="nav-section">Technical</div>
+    <a href="architecture.html"><span class="icon">🏗</span> Architecture</a>
+    <a href="decisions.html" class="active"><span class="icon">🔒</span> Decisions</a>
+    <div class="nav-section">Tracking</div>
+    <a href="tracking.html"><span class="icon">🐛</span> Bugs &amp; Questions</a>
+    <a href="audit.html"><span class="icon">🔍</span> Audit</a>
+  </nav>
+  <div class="sidebar-footer">Last updated: 2026-05-29</div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Decision Log</h1>
+    <p>All locked design and product decisions with full rationale. 14 decisions total.</p>
+  </div>
+
+  <div class="cards cards-4" style="margin-bottom: 28px;">
+    <div class="card green">
+      <h2>Locked</h2>
+      <div class="value">13</div>
+      <div class="sub">Final — do not revisit</div>
+    </div>
+    <div class="card yellow">
+      <h2>Pending</h2>
+      <div class="value">1</div>
+      <div class="sub">D02 — awaiting builder confirm</div>
+    </div>
+    <div class="card blue">
+      <h2>Phase 1</h2>
+      <div class="value">9</div>
+      <div class="sub">Required for MVP</div>
+    </div>
+    <div class="card purple">
+      <h2>Phase 2+</h2>
+      <div class="value">5</div>
+      <div class="sub">D07, D13, D14 + future</div>
+    </div>
+  </div>
+
+  <!-- D01 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D01</span>
+      <h3>Deployment Model: Self-Hosted Docker Compose</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">All Phases</span>
+    </div>
+    <p>NEXUS is a self-hosted product. Clients deploy and run it on their own VPS using Docker Compose. The builder does not manage client infrastructure.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> SaaS means owning client uptime. One crash or bad deployment stops product development while the builder firefights. Self-hosted shifts infra responsibility to the client. The blame changes form but loses urgency and removes on-call burden.
+      <br><strong>Constraints:</strong> <code>docker-compose up</code> must work first time, every time. JWT secret generated per-installation. License enforcement must work without a persistent central server.
+    </div>
+  </div>
+
+  <!-- D02 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D02</span>
+      <h3>Business Model: Annual License Key</h3>
+      <span class="badge badge-yellow">Pending builder confirmation</span>
+      <span class="badge badge-purple">Phase 4</span>
+    </div>
+    <p>NEXUS is sold as an annual renewable license. Client pays → receives license key valid for 12 months. Non-renewing clients keep the product working on their current version.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> One-time pricing creates a revenue cliff. Monthly SaaS has ongoing service connotations the builder doesn't want. Annual license is standard in B2B, expected by company procurement departments, and creates a renewal cohort.
+      <br><strong>Tiers (future):</strong> Solo PM (1 install, 3 projects) · Team (unlimited projects) · Agency (5 installs)
+    </div>
+  </div>
+
+  <!-- D03 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D03</span>
+      <h3>LLM: Qwen2.5-7B via Ollama</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Use <code>qwen2.5:7b</code> via Ollama instead of Hermes3. ~5 GB Q4_K_M quantized.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Hermes3 is English-first. SEA EPC teams code-switch between Bahasa Indonesia and English in WhatsApp and documents. Qwen2.5-7B has significantly better multilingual SEA performance with similar VRAM requirements. Both run via Ollama with no architecture change.
+    </div>
+  </div>
+
+  <!-- D04 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D04</span>
+      <h3>Embedding Model: multilingual-e5-large (1024d)</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Use <code>intfloat/multilingual-e5-large</code> for embeddings. 1024 dimensions. Must be set consistently from day 1 — ChromaDB collections are dimension-locked.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> <code>nomic-embed-text</code> degrades on Bahasa Indonesia. WhatsApp chats — the most critical knowledge source — are in Bahasa or mixed language. Poor embedding = poor retrieval regardless of model quality.
+      <br><strong>Critical:</strong> Changing embedding model after ingestion requires full re-ingestion. Document clearly in setup guide.
+    </div>
+  </div>
+
+  <!-- D05 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D05</span>
+      <h3>Multi-tenancy: One ChromaDB Collection Per Project</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Each project gets its own named ChromaDB collection: <code>nexus_project_{project_id}</code>. All queries scoped to the active <code>project_id</code>. No cross-project retrieval.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Simplest isolation model. No risk of cross-project bleed. No complex filter logic in every query. Alternatives (filtering by metadata within a shared collection) add complexity without benefit at this scale.
+    </div>
+  </div>
+
+  <!-- D06 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D06</span>
+      <h3>JWT Auth: project_id + role Claims</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Every JWT carries two custom claims: <code>project_id</code> (string) and <code>role</code> (enum: <code>pm | engineer | field_tech | procurement</code>).</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> <code>project_id</code> required for D05 collection scoping. <code>role</code> required for Phase 3 intent-aware retrieval but must be in token schema from day 1 to avoid a token migration later. Default Phase 1: <code>pm</code> for admin, <code>engineer</code> for others.
+    </div>
+  </div>
+
+  <!-- D07 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D07</span>
+      <h3>Authority Hierarchy: Configurable Per Project</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-purple">Phase 2</span>
+    </div>
+    <p>Authority levels are not globally hardcoded. PM admin configures hierarchy per project. Default 5-level hierarchy provided if not configured.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Real EPC organizations differ. In safety-critical contexts, a field tech's on-site WhatsApp hazard report may override a SOP. The hierarchy must be editable per project, not globally fixed.
+    </div>
+  </div>
+
+  <!-- D08 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D08</span>
+      <h3>Project Switcher: Phase 1 (moved from Phase 3)</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>The project switcher UI component is a Phase 1 requirement. A PM managing many concurrent projects needs to switch project context from day 1.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> A PM running 8 concurrent projects with no switcher will not use the product. The ChromaDB collection-per-project design (D05) makes this straightforward: switching projects just changes the active <code>project_id</code> in the session.
+    </div>
+  </div>
+
+  <!-- D09 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D09</span>
+      <h3>P&amp;ID Tag Extraction: Phase 1 (moved from Phase 4)</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Basic P&amp;ID instrument tag extraction (regex-based) in Phase 1. Advanced OCR-based parsing remains Phase 4.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> "What is the spec for AT-201?" is one of the most common EPC queries. The MVP without tag extraction cannot answer it. Regex patterns (<code>[A-Z]{2,4}-\d{3,4}</code>) cover 80% of cases and can be implemented in hours.
+    </div>
+  </div>
+
+  <!-- D10 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D10</span>
+      <h3>Reference Deployment: DigitalOcean Singapore 16GB</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Official documented deployment spec: DigitalOcean Singapore, 16 GB RAM, 8 vCPU Droplet. ~$96 USD/month.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Low latency for SEA clients. PM-friendly dashboard. 16 GB fits Qwen2.5-7B Q4_K_M (~5 GB) + ChromaDB + FastAPI + React with headroom. Within budget for a business-critical tool.
+    </div>
+  </div>
+
+  <!-- D11 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D11</span>
+      <h3>Chunking: Document-Type-Specific Per Parser</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Each parser implements its own chunking strategy. No shared naive chunker.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Naive fixed-size chunking breaks table rows mid-row, splits SOP steps mid-instruction, severs BOM line items from column headers. Poor chunking directly causes poor retrieval regardless of embedding quality.
+    </div>
+    <div class="rationale" style="border-top: none; padding-top: 0; margin-top: 4px;">
+      <strong>Strategy by type:</strong>
+      WhatsApp → by message, grouped by date window ·
+      PDF → by paragraph, section headers respected ·
+      P&amp;ID → per instrument tag region ·
+      Excel BOM → by row, column headers prepended ·
+      DOCX SOP → by section heading, numbered steps preserved ·
+      Email → by message, reply context preserved
+    </div>
+  </div>
+
+  <!-- D12 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D12</span>
+      <h3>WhatsApp Language: Multilingual Code-Switching (Bahasa + English)</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+    </div>
+    <p>Target clients' WhatsApp project chats are multilingual with heavy code-switching between Bahasa Indonesia/Malay and English.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Confirms D04 (<code>multilingual-e5-large</code>) and D03 (Qwen2.5-7B). WhatsApp parser will support multilingual content from day 1, avoiding subsequent parsing or embedding dimension migrations.
+    </div>
+  </div>
+
+  <!-- D13 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D13</span>
+      <h3>Distribution Format: Zip File / Private GitHub Repo</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-blue">Phase 1</span>
+      <span class="badge badge-purple">Phase 4</span>
+    </div>
+    <p>Phase 1: private GitHub repo + downloadable ZIP with <code>docker-compose.yml</code>. Phase 4: private Docker Hub with license checks.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Minimizes launch overhead for early clients. Allows trust-based adoption initially. Technical IP protection and programmatic validation deferred to Phase 4 commercialization.
+    </div>
+  </div>
+
+  <!-- D14 -->
+  <div class="decision">
+    <div class="decision-header">
+      <span class="decision-id">D14</span>
+      <h3>License Pricing: Recurring Annual / Monthly Renewal</h3>
+      <span class="badge badge-green">Locked</span>
+      <span class="badge badge-purple">Phase 4</span>
+    </div>
+    <p>Recurring subscription-like license key (annual or monthly options) over a flat one-time purchase.</p>
+    <div class="rationale">
+      <strong>Rationale:</strong> Mitigates revenue cliff risk. Supports ongoing maintenance. Aligns with B2B software purchasing cycles expected by company procurement in Southeast Asia. Active subscriptions authorize clients to pull future updates and access support.
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

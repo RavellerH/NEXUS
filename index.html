@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Dev Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Pre-Implementation</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html" class="active"><span class="icon">⬛</span> Dashboard</a>
+    <a href="roadmap.html"><span class="icon">🗺</span> Roadmap</a>
+    <div class="nav-section">Technical</div>
+    <a href="architecture.html"><span class="icon">🏗</span> Architecture</a>
+    <a href="decisions.html"><span class="icon">🔒</span> Decisions</a>
+    <div class="nav-section">Tracking</div>
+    <a href="tracking.html"><span class="icon">🐛</span> Bugs &amp; Questions</a>
+    <a href="audit.html"><span class="icon">🔍</span> Audit</a>
+  </nav>
+  <div class="sidebar-footer">
+    Last updated: 2026-05-29
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Development Dashboard</h1>
+    <p>Live status monitor for NEXUS — self-hosted AI context engine for EPC engineering teams.</p>
+  </div>
+
+  <div class="cards cards-4">
+    <div class="card blue">
+      <h2>Current Phase</h2>
+      <div class="value">1 / 4</div>
+      <div class="sub">Working MVP — not started</div>
+    </div>
+    <div class="card green">
+      <h2>Decisions Locked</h2>
+      <div class="value">14</div>
+      <div class="sub">D01–D14 confirmed</div>
+    </div>
+    <div class="card yellow">
+      <h2>Open Questions</h2>
+      <div class="value">2</div>
+      <div class="sub">Q4 setup service · Q5 buyer type</div>
+    </div>
+    <div class="card red">
+      <h2>Known Bugs</h2>
+      <div class="value">3</div>
+      <div class="sub">PRE-001 · PRE-002 · PRE-003</div>
+    </div>
+  </div>
+
+  <div class="cards cards-4">
+    <div class="card red">
+      <h2>Audit — Critical</h2>
+      <div class="value">5</div>
+      <div class="sub">Must fix before coding</div>
+    </div>
+    <div class="card orange">
+      <h2>Audit — High</h2>
+      <div class="value">14</div>
+      <div class="sub">Fix before first demo</div>
+    </div>
+    <div class="card yellow">
+      <h2>Audit — Medium</h2>
+      <div class="value">10</div>
+      <div class="sub">Fix before first client</div>
+    </div>
+    <div class="card green">
+      <h2>Audit — Low</h2>
+      <div class="value">5</div>
+      <div class="sub">Cosmetic / nice-to-have</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Current State</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Area</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Documentation</td>
+            <td><span class="badge badge-green">Complete</span></td>
+            <td>24 spec files, decision log, bug tracker, audit reports</td>
+          </tr>
+          <tr>
+            <td>Architecture Decisions</td>
+            <td><span class="badge badge-green">Locked</span></td>
+            <td>14 decisions confirmed. 2 open questions remain.</td>
+          </tr>
+          <tr>
+            <td>Backend — Ingestion</td>
+            <td><span class="badge badge-gray">Not started</span></td>
+            <td>Specs: whatsapp, pdf, excel, docx, pid parsers ready</td>
+          </tr>
+          <tr>
+            <td>Backend — Context Store</td>
+            <td><span class="badge badge-gray">Not started</span></td>
+            <td>Hybrid ChromaDB + SQLite FTS5 design locked</td>
+          </tr>
+          <tr>
+            <td>Backend — Query Engine</td>
+            <td><span class="badge badge-gray">Not started</span></td>
+            <td>hybrid_query() routing spec complete</td>
+          </tr>
+          <tr>
+            <td>Backend — API</td>
+            <td><span class="badge badge-gray">Not started</span></td>
+            <td>FastAPI routes spec written; error contracts pending (C03)</td>
+          </tr>
+          <tr>
+            <td>Frontend</td>
+            <td><span class="badge badge-gray">Not started</span></td>
+            <td>React + Tailwind; project switcher required Phase 1</td>
+          </tr>
+          <tr>
+            <td>Infrastructure</td>
+            <td><span class="badge badge-gray">Not started</span></td>
+            <td>docker-compose.yml not written yet (M07 open)</td>
+          </tr>
+          <tr>
+            <td>Tests</td>
+            <td><span class="badge badge-gray">Not started</span></td>
+            <td>No test tasks in todo (H10 audit finding)</td>
+          </tr>
+          <tr>
+            <td>License Key System</td>
+            <td><span class="badge badge-purple">Phase 4</span></td>
+            <td>Annual renewal model decided (D02/D14). Implementation deferred.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Phase 1 MVP Scope</h2>
+    <p style="color: var(--muted); margin-bottom: 16px; font-size: 13px;">Goal: A working local deployment a power-user PM can run on a real project. PM can upload docs, ask questions, get cited answers, switch between projects.</p>
+
+    <div class="cards cards-3">
+      <div class="card">
+        <h2>Deployment Stack</h2>
+        <div style="font-size: 13px; margin-top: 8px;">
+          <div style="margin-bottom: 6px;"><code>FastAPI</code> backend</div>
+          <div style="margin-bottom: 6px;"><code>ChromaDB</code> vector store</div>
+          <div style="margin-bottom: 6px;"><code>Ollama</code> — Qwen2.5-7B + multilingual-e5-large</div>
+          <div style="margin-bottom: 6px;"><code>SQLite FTS5</code> hybrid exact index</div>
+          <div><code>React</code> + Tailwind frontend</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Target Hardware</h2>
+        <div style="font-size: 13px; margin-top: 8px;">
+          <div style="margin-bottom: 6px;">DigitalOcean Singapore</div>
+          <div style="margin-bottom: 6px;"><strong>16 GB RAM</strong> · 8 vCPU</div>
+          <div style="margin-bottom: 6px;">~$96 USD / month</div>
+          <div style="color: var(--muted);">Two deploy paths: online + offline/air-gapped</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Primary Market</h2>
+        <div style="font-size: 13px; margin-top: 8px;">
+          <div style="margin-bottom: 6px;">SEA EPC teams</div>
+          <div style="margin-bottom: 6px;">Indonesia · Malaysia · Philippines</div>
+          <div style="margin-bottom: 6px;">Bahasa + English code-switching</div>
+          <div style="color: var(--muted);">5–10 field engineers per PM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Key Decisions at a Glance</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Decision</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>D01</code></td><td>Self-hosted Docker Compose (not SaaS)</td><td><span class="badge badge-green">Locked</span></td></tr>
+          <tr><td><code>D02</code></td><td>Annual license key business model</td><td><span class="badge badge-yellow">Pending confirm</span></td></tr>
+          <tr><td><code>D03</code></td><td>LLM: Qwen2.5-7B via Ollama</td><td><span class="badge badge-green">Locked</span></td></tr>
+          <tr><td><code>D04</code></td><td>Embeddings: multilingual-e5-large (1024d)</td><td><span class="badge badge-green">Locked</span></td></tr>
+          <tr><td><code>D05</code></td><td>One ChromaDB collection per project</td><td><span class="badge badge-green">Locked</span></td></tr>
+          <tr><td><code>D08</code></td><td>Project switcher in Phase 1 (not Phase 3)</td><td><span class="badge badge-green">Locked</span></td></tr>
+          <tr><td><code>D09</code></td><td>P&amp;ID tag extraction in Phase 1 (regex)</td><td><span class="badge badge-green">Locked</span></td></tr>
+          <tr><td><code>D11</code></td><td>Document-type-specific chunking per parser</td><td><span class="badge badge-green">Locked</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Full decision log → <a href="decisions.html" style="color: var(--blue);">decisions.html</a></p>
+  </div>
+
+  <div class="section">
+    <h2>Blocking Audit Items</h2>
+    <div class="alert"><strong>Action required</strong> — 5 critical issues must be resolved before any Phase 1 code is written.</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Issue</th><th>Severity</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>C01</code></td><td>Wrong embedding model name — <strong>Fixed</strong></td><td><span class="badge badge-green">Fixed</span></td></tr>
+          <tr><td><code>C02</code></td><td>3 module specs missing (ingestion-pipeline, metadata-tagger, chunker)</td><td><span class="badge badge-red">Critical</span></td></tr>
+          <tr><td><code>C03</code></td><td>API error response contract not defined</td><td><span class="badge badge-red">Critical</span></td></tr>
+          <tr><td><code>C04</code></td><td>JWT token lifecycle unspecified (TTL, logout, revocation)</td><td><span class="badge badge-red">Critical</span></td></tr>
+          <tr><td><code>C05</code></td><td>No ingestion error handling strategy</td><td><span class="badge badge-red">Critical</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Full audit → <a href="audit.html" style="color: var(--blue);">audit.html</a></p>
+  </div>
+
+</main>
+</body>
+</html>

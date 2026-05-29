@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Bugs &amp; Questions</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Pre-Implementation</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html"><span class="icon">⬛</span> Dashboard</a>
+    <a href="roadmap.html"><span class="icon">🗺</span> Roadmap</a>
+    <div class="nav-section">Technical</div>
+    <a href="architecture.html"><span class="icon">🏗</span> Architecture</a>
+    <a href="decisions.html"><span class="icon">🔒</span> Decisions</a>
+    <div class="nav-section">Tracking</div>
+    <a href="tracking.html" class="active"><span class="icon">🐛</span> Bugs &amp; Questions</a>
+    <a href="audit.html"><span class="icon">🔍</span> Audit</a>
+  </nav>
+  <div class="sidebar-footer">Last updated: 2026-05-29</div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Bugs &amp; Open Questions</h1>
+    <p>Pre-implementation issues and unresolved design questions blocking specific decisions.</p>
+  </div>
+
+  <div class="cards cards-4">
+    <div class="card red">
+      <h2>Critical Bugs</h2>
+      <div class="value">2</div>
+      <div class="sub">PRE-002 · PRE-003</div>
+    </div>
+    <div class="card orange">
+      <h2>High Bugs</h2>
+      <div class="value">1</div>
+      <div class="sub">PRE-001</div>
+    </div>
+    <div class="card yellow">
+      <h2>Open Questions</h2>
+      <div class="value">2</div>
+      <div class="sub">Q4 · Q5</div>
+    </div>
+    <div class="card green">
+      <h2>Resolved Questions</h2>
+      <div class="value">10</div>
+      <div class="sub">All moved to decisions.md</div>
+    </div>
+  </div>
+
+  <!-- Pre-implementation bugs -->
+  <div class="section">
+    <h2>Pre-Implementation Issues</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">Design-level issues identified before any code was written. Will become bugs if not addressed in implementation.</p>
+
+    <div class="issue high">
+      <div class="issue-header">
+        <span class="badge badge-orange">HIGH</span>
+        <span class="badge badge-gray">open</span>
+        <h3>PRE-001 — WhatsApp Parser Format Fragility</h3>
+      </div>
+      <p>WhatsApp <code>.txt</code> export format differs between iOS and Android, varies by locale and OS version, and changes without notice. A single parser written against one format will silently fail or produce malformed chunks on others.</p>
+      <div class="fix">
+        <strong>Fix required:</strong> iOS format uses <code>[DD/MM/YYYY, HH:MM:SS]</code> with square brackets. Android uses <code>DD/MM/YYYY, HH:MM - </code>. Need format auto-detection at parse time. Build a format version registry and test fixtures for each known variant.
+      </div>
+    </div>
+
+    <div class="issue critical">
+      <div class="issue-header">
+        <span class="badge badge-red">CRITICAL</span>
+        <span class="badge badge-gray">open</span>
+        <h3>PRE-002 — Embedding Dimension Lock-in</h3>
+      </div>
+      <p>ChromaDB collections are locked to the embedding dimension they were created with. If the embedding model is changed after ingestion, the entire collection must be deleted and all documents re-ingested. This is not communicated to the user.</p>
+      <div class="fix">
+        <strong>Fix required:</strong> <code>multilingual-e5-large</code> = 1024 dimensions. <code>nomic-embed-text</code> = 768 — incompatible. System must check at startup that the configured model matches the dimension of existing collections. Setup guide must warn clearly.
+      </div>
+    </div>
+
+    <div class="issue critical">
+      <div class="issue-header">
+        <span class="badge badge-red">CRITICAL</span>
+        <span class="badge badge-gray">open</span>
+        <h3>PRE-003 — Docker Volume Loss = Total Knowledge Base Loss</h3>
+      </div>
+      <p>If the Docker volume containing ChromaDB data is lost (accidental <code>docker-compose down -v</code>, host disk failure, VPS rebuild), all ingested knowledge is permanently gone. No backup or restore mechanism exists.</p>
+      <div class="fix">
+        <strong>Fix required:</strong> Daily automated snapshot of ChromaDB + FTS5 data directories. Clear restore documentation. Named volumes in <code>docker-compose.yml</code> to prevent accidental deletion. Off-site backup recommended (same-disk backup doesn't protect against disk failure).
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Questions -->
+  <div class="section">
+    <h2>Open Questions</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">Unanswered questions that block specific design or implementation decisions.</p>
+
+    <div class="decision">
+      <div class="decision-header">
+        <span class="decision-id">Q4</span>
+        <h3>Setup Service — Done-For-You or Fully Self-Serve?</h3>
+        <span class="badge badge-yellow">Important</span>
+        <span class="badge badge-gray">Medium priority</span>
+      </div>
+      <p>Does the purchase include a done-for-you VPS setup, or is it fully self-serve?</p>
+      <div class="rationale">
+        <strong>Why it matters:</strong> The gap between "self-hosted" and "non-technical PM" is real. Even with a perfect Docker Compose bundle, setting up a DigitalOcean droplet and running first-time setup requires terminal comfort.
+        <br><br>
+        <strong>Options:</strong><br>
+        A. Fully self-serve — works if setup guide is very good and one-command setup actually works<br>
+        B. Paid setup add-on — e.g., Rp 500K–1 juta for first deployment; removes biggest adoption barrier<br>
+        C. Free setup for first N clients — good for testimonials and learning what breaks
+        <br><br>
+        <strong>Recommendation:</strong> Offer paid setup as an optional add-on. Keep self-serve path working in parallel. Early clients: do setup free to learn failure modes.
+        <br><strong>Blocks:</strong> Onboarding flow design, pricing add-on structure
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="decision-header">
+        <span class="decision-id">Q5</span>
+        <h3>Buyer: PM Personally or Company Procurement?</h3>
+        <span class="badge badge-yellow">Important</span>
+        <span class="badge badge-gray">Medium priority</span>
+      </div>
+      <p>Is the actual buyer the PM personally (personal bank transfer / credit card), or their company (invoice to accounts department + procurement process)?</p>
+      <div class="rationale">
+        <strong>Why it matters:</strong> In SEA EPC firms, software purchases above a threshold go through procurement. This means payment by bank transfer (invoice), signed agreement or PO may be required, and the decision maker (PM) is not the budget approver (finance).
+        <br><br>
+        <strong>Options:</strong><br>
+        A. Individual buyer → Gumroad/LemonSqueezy/Stripe; fast; low friction; limits deal size<br>
+        B. Company buyer → Invoice-based; slower; higher deal size; requires invoicing and contract templates
+        <br><br>
+        <strong>Recommendation:</strong> Design for <strong>company buyer</strong> (invoice + bank transfer). Most EPC PMs in Indonesia will not use a personal card for business software. Build a simple invoice template and WhatsApp-friendly sales flow.
+        <br><strong>Blocks:</strong> Payment flow design, invoicing, sales process
+      </div>
+    </div>
+  </div>
+
+  <!-- Resolved Questions -->
+  <div class="section">
+    <h2>Resolved Questions</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">All answered — full rationale in the <a href="decisions.html" style="color: var(--blue);">Decisions log</a>.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Question</th><th>Answer</th><th>Decision</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SaaS or self-hosted?</td>
+            <td>Self-hosted</td>
+            <td><span class="badge badge-green">D01</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>Team size per PM?</td>
+            <td>5–10 field engineers</td>
+            <td><span class="badge badge-green">D01</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>Projects per PM?</td>
+            <td>Many concurrent</td>
+            <td><span class="badge badge-green">D08</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>Primary market?</td>
+            <td>SEA — Indonesia, Malaysia, Philippines</td>
+            <td><span class="badge badge-green">D10</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>Deployment target?</td>
+            <td>Client's own VPS</td>
+            <td><span class="badge badge-green">D01</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>WhatsApp staleness tolerance?</td>
+            <td>Daily is fine; 2+ days = team issue</td>
+            <td><span class="badge badge-green">D12</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>Distribution model?</td>
+            <td>Digital product (deployable package)</td>
+            <td><span class="badge badge-green">D13</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>WhatsApp chat language?</td>
+            <td>Multilingual — Bahasa + English code-switching</td>
+            <td><span class="badge badge-green">D12</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>Distribution format?</td>
+            <td>Zip file / private GitHub repo</td>
+            <td><span class="badge badge-green">D13</span></td>
+            <td>2026-05-29</td>
+          </tr>
+          <tr>
+            <td>License pricing model?</td>
+            <td>Recurring annual / monthly renewal</td>
+            <td><span class="badge badge-green">D14</span></td>
+            <td>2026-05-29</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
