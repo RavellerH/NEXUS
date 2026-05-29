@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Audit</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Pre-Implementation</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html"><span class="icon">⬛</span> Dashboard</a>
+    <a href="roadmap.html"><span class="icon">🗺</span> Roadmap</a>
+    <div class="nav-section">Technical</div>
+    <a href="architecture.html"><span class="icon">🏗</span> Architecture</a>
+    <a href="decisions.html"><span class="icon">🔒</span> Decisions</a>
+    <div class="nav-section">Tracking</div>
+    <a href="tracking.html"><span class="icon">🐛</span> Bugs &amp; Questions</a>
+    <a href="audit.html" class="active"><span class="icon">🔍</span> Audit</a>
+  </nav>
+  <div class="sidebar-footer">Last updated: 2026-05-29</div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Audit Report</h1>
+    <p>Documentation audit conducted by Claude (claude-sonnet-4-6) and cross-referenced with Gemini 3.5 Flash (Antigravity AI). 36 issues total.</p>
+  </div>
+
+  <div class="cards cards-4">
+    <div class="card red">
+      <h2>Critical</h2>
+      <div class="value">5</div>
+      <div class="sub">Fix before writing code</div>
+    </div>
+    <div class="card orange">
+      <h2>High</h2>
+      <div class="value">14</div>
+      <div class="sub">Fix before first demo</div>
+    </div>
+    <div class="card yellow">
+      <h2>Medium</h2>
+      <div class="value">10</div>
+      <div class="sub">Fix before first client</div>
+    </div>
+    <div class="card green">
+      <h2>Low</h2>
+      <div class="value">5</div>
+      <div class="sub">Cosmetic / nice-to-have</div>
+    </div>
+  </div>
+
+  <div class="alert"><strong>Action required</strong> — 5 critical issues listed below must be resolved before Phase 1 implementation begins.</div>
+
+  <!-- Cross-audit -->
+  <div class="section">
+    <h2>Cross-Audit Findings (GEMINI-AUDIT.md)</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">Gemini 3.5 Flash independently audited the same documentation. Two unique findings were confirmed and applied.</p>
+
+    <div class="issue low">
+      <div class="issue-header">
+        <span class="badge badge-green">Applied</span>
+        <h3>GA01 — Air-Gap Paradox</h3>
+      </div>
+      <p>NEXUS markets "No cloud. No data leaks." but the default setup pulls ~5.6 GB from the internet on first run. Industrial EPC sites frequently operate behind strict firewalls with no outbound internet access.</p>
+      <div class="fix">
+        <strong>Applied to:</strong> <code>docs/business/infrastructure.md</code> — added Air-gap paradox section with two deployment paths (online default + offline override), <code>docker-compose.offline.yml</code> spec, and <code>scripts/package-models.sh</code>.
+        Also added offline bootstrap tasks to Phase 1 todo.
+      </div>
+    </div>
+
+    <div class="issue low">
+      <div class="issue-header">
+        <span class="badge badge-green">Applied</span>
+        <h3>GA02 — Hybrid SQLite FTS5 Index for Alphanumeric Precision</h3>
+      </div>
+      <p>Dense embeddings cannot reliably distinguish <code>AT-201</code> from <code>AT-202</code>, or <code>CBL-001-HV-4</code> from <code>CBL-001-HV-3</code>. Semantic search on instrument tags, part numbers, and PO numbers produces wrong results with high confidence scores.</p>
+      <div class="fix">
+        <strong>Applied to:</strong> <code>docs/modules/context-store/vector-store.md</code> — full Hybrid Index section with SQLite FTS5 schema, query routing logic (<code>EXACT_PATTERN</code> regex), <code>fts_search()</code> and <code>hybrid_query()</code> interface.
+        <code>docs/modules/query/query-engine.md</code> — updated to use <code>hybrid_query()</code> as primary entry point.
+      </div>
+    </div>
+
+    <div class="section" style="margin-top: 16px;">
+      <h2>Gemini Findings — Pending Action</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Finding</th><th>Status</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Conflict resolver false positives</td>
+              <td><span class="badge badge-yellow">Open</span></td>
+              <td>Similarity &gt;0.85 flags complementary facts as contradictions. Needs two-stage filter in Phase 2 spec.</td>
+            </tr>
+            <tr>
+              <td>Intent detector embedding skew</td>
+              <td><span class="badge badge-yellow">Open</span></td>
+              <td>Appending role strings to query shifts vector direction. Log as open question for Phase 3 design.</td>
+            </tr>
+            <tr>
+              <td>Background ingestion worker</td>
+              <td><span class="badge badge-green">Partially applied</span></td>
+              <td>FastAPI <code>BackgroundTasks</code> added to todo. Full Celery spec deferred to Phase 2+.</td>
+            </tr>
+            <tr>
+              <td>ChromaDB plain-text storage at rest</td>
+              <td><span class="badge badge-yellow">Open</span></td>
+              <td>No encryption on SQLite file inside Docker volume. Mitigation: VPS-level disk encryption. Document in infrastructure.md.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Critical Issues -->
+  <div class="section">
+    <h2>Critical Issues — Fix Before Writing Code</h2>
+
+    <div class="issue critical">
+      <div class="issue-header">
+        <span class="badge badge-green">Fixed</span>
+        <span class="badge badge-red">C01</span>
+        <h3>Wrong Embedding Model Name Breaks First-Run Setup</h3>
+      </div>
+      <p><strong>File:</strong> <code>docs/business/infrastructure.md</code><br>
+      <code>milkey-mouse/multilingual-e5-large</code> is not a valid Ollama namespace. Would cause <code>docker-compose up</code> to fail on first run.</p>
+      <div class="fix"><strong>Fixed:</strong> Changed to <code>intfloat/multilingual-e5-large</code> (correct Ollama registry name).</div>
+    </div>
+
+    <div class="issue critical">
+      <div class="issue-header">
+        <span class="badge badge-red">Open</span>
+        <span class="badge badge-red">C02</span>
+        <h3>3 Module Specs Missing — Blocks Phase 1 Implementation</h3>
+      </div>
+      <p>The following modules appear in data flow diagrams and todo.md but have no spec file:</p>
+      <ul style="font-size: 13px; color: var(--muted); padding-left: 20px; margin: 8px 0;">
+        <li><code>docs/modules/ingestion/metadata-tagger.md</code></li>
+        <li><code>docs/modules/ingestion/chunker.md</code> (or clarify it's per-parser only)</li>
+        <li><code>docs/modules/ingestion/ingestion-pipeline.md</code></li>
+      </ul>
+      <div class="fix"><strong>Fix:</strong> Create ingestion-pipeline.md (orchestration, error handling, retry). Create metadata-tagger.md. Clarify chunker scope per D11.</div>
+    </div>
+
+    <div class="issue critical">
+      <div class="issue-header">
+        <span class="badge badge-red">Open</span>
+        <span class="badge badge-red">C03</span>
+        <h3>API Error Responses Not Specified — Will Cause Rework</h3>
+      </div>
+      <p><strong>File:</strong> <code>docs/modules/api/api.md</code><br>
+      API spec defines success responses but no error responses. Frontend developer has no contract for failure states. What code does <code>POST /projects/{id}/query</code> return if project doesn't exist?</p>
+      <div class="fix"><strong>Fix:</strong> Add error contract to api.md with standard JSON shape: <code>{"error": "string", "code": "PROJECT_NOT_FOUND | UNAUTHORIZED | ...", "detail": "string"}</code></div>
+    </div>
+
+    <div class="issue critical">
+      <div class="issue-header">
+        <span class="badge badge-red">Open</span>
+        <span class="badge badge-red">C04</span>
+        <h3>JWT Token Lifecycle Unspecified — Security Gap</h3>
+      </div>
+      <p><strong>File:</strong> <code>docs/modules/api/api.md</code><br>
+      <code>POST /auth/refresh</code> listed but not specified. Access token TTL unspecified (could be infinite). No logout / revocation mechanism. No JWT_SECRET rotation procedure.</p>
+      <div class="fix"><strong>Fix:</strong> Access token TTL: 8h. Phase 1: re-login on expiry. Logout: <code>DELETE /auth/session</code> adds token to in-memory blocklist. Role change effective on next login. JWT_SECRET rotation: change in .env + restart.</div>
+    </div>
+
+    <div class="issue critical">
+      <div class="issue-header">
+        <span class="badge badge-red">Open</span>
+        <span class="badge badge-red">C05</span>
+        <h3>No Ingestion Error Handling Strategy</h3>
+      </div>
+      <p><strong>Files:</strong> <code>docs/todo.md</code>, all ingestion module specs<br>
+      No system-wide answer: if 4 files are uploaded and file 3 fails, do files 1, 2, 4 commit? If ingestion crashes mid-PDF, does it resume or restart? How does the PM know a file failed?</p>
+      <div class="fix"><strong>Fix:</strong> Per-file isolation. Failure of one file doesn't block others. Partial success with per-file status and error reason. Re-ingestion is idempotent. Failed files shown in UI with specific error.</div>
+    </div>
+  </div>
+
+  <!-- High Issues -->
+  <div class="section">
+    <h2>High Issues — Fix Before First Demo</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Issue</th><th>File</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>H01</code></td>
+            <td>LlamaIndex vs. custom pipeline is "TBD" — blocks Phase 1</td>
+            <td><code>docs/modules/INDEX.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H02</code></td>
+            <td>VectorStore interface has no error handling contract</td>
+            <td><code>vector-store.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H03</code></td>
+            <td>Confidence signal definition inconsistent across docs</td>
+            <td><code>response-builder.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H04</code></td>
+            <td>Conflict resolver cache backend unspecified (in-memory? Redis? disk?)</td>
+            <td><code>conflict-resolver.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H05</code></td>
+            <td>Authority ranker config has no storage or API path</td>
+            <td><code>authority-ranker.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H06</code></td>
+            <td>JWT_SECRET auto-generation not in todo — will be hardcoded or forgotten</td>
+            <td><code>docs/todo.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H07</code></td>
+            <td>No CORS, rate limiting, or upload security spec</td>
+            <td><code>docs/modules/api/api.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H08</code></td>
+            <td>Ollama port 11434 exposure not documented — CPU exhaustion risk</td>
+            <td><code>response-builder.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H09</code></td>
+            <td>WhatsApp format registry not in todo (no test fixtures)</td>
+            <td><code>docs/todo.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H10</code></td>
+            <td>No testing tasks in todo anywhere</td>
+            <td><code>docs/todo.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H11</code></td>
+            <td><code>chunk_id</code> derivation algorithm ambiguous — deduplication contract undefined</td>
+            <td><code>vector-store.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H12</code></td>
+            <td>No end-user documentation tasks (admin guide, user guide, troubleshooting)</td>
+            <td><code>docs/todo.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H13</code></td>
+            <td>LLM inference parameters incomplete — no timeout, retry, stop sequences</td>
+            <td><code>response-builder.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+          <tr>
+            <td><code>H14</code></td>
+            <td>No disaster recovery procedure — off-site backup, RTO/RPO, full restore steps</td>
+            <td><code>infrastructure.md</code></td>
+            <td><span class="badge badge-red">Open</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Medium Issues -->
+  <div class="section">
+    <h2>Medium Issues — Fix Before First Paying Client</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Issue</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>M01</code></td><td>Missing open question: license key validation strategy (offline enforcement?)</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M02</code></td><td>Multi-project user access model undefined — blocks project switcher (Phase 1 blocker)</td><td><span class="badge badge-red">Open</span></td></tr>
+          <tr><td><code>M03</code></td><td>ChromaDB scaling limits not documented — no warning signs or migration path</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M04</code></td><td>Frontmatter <code>status</code> values inconsistent across files — breaks AI agent parsing</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M05</code></td><td>No separation between PM role and system admin — multi-PM access undefined</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M06</code></td><td>Response builder prompt is English-only — Bahasa users will get English responses</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M07</code></td><td><code>docker-compose.yml</code> has no spec — core Phase 1 deliverable with no definition</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M08</code></td><td>README Quick Start runs before status disclaimer — users will try broken commands</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M09</code></td><td><code>.gitignore</code> missing Node/React, ChromaDB, and docker override patterns</td><td><span class="badge badge-yellow">Open</span></td></tr>
+          <tr><td><code>M10</code></td><td><code>.env.example</code> task exists but required variables not listed</td><td><span class="badge badge-yellow">Open</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Low Issues -->
+  <div class="section">
+    <h2>Low Issues</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Issue</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>L01</code></td><td><code>planning.md</code> is now redundant with <code>INDEX.md</code> — differentiate or remove</td><td><span class="badge badge-gray">Low priority</span></td></tr>
+          <tr><td><code>L02</code></td><td>Tech stack table has "TBD" cells — no TBD in a table implementers read to decide what to install</td><td><span class="badge badge-gray">Low priority</span></td></tr>
+          <tr><td><code>L03</code></td><td>README has two consecutive "Implementation not started" notes — one is sufficient</td><td><span class="badge badge-gray">Low priority</span></td></tr>
+          <tr><td><code>L04</code></td><td>Bug template missing <code>Fixed in: vX.X</code> field — no closure tracking</td><td><span class="badge badge-gray">Low priority</span></td></tr>
+          <tr><td><code>L05</code></td><td>LICENSE year/name should be verified as intended copyright holder</td><td><span class="badge badge-gray">Low priority</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Action Priority -->
+  <div class="section">
+    <h2>Recommended Action Priority</h2>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-red">Before writing any code</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Issue</th><th>Why blocking</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>C02 — Create missing module specs</td><td>No spec = no implementation contract for ingestion pipeline</td></tr>
+            <tr><td>2</td><td>C03 — Add API error response contract</td><td>Frontend can't handle failures without agreed error format</td></tr>
+            <tr><td>3</td><td>C04 — Specify JWT token lifecycle</td><td>Security gap + auth rework risk if decided late</td></tr>
+            <tr><td>4</td><td>C05 — Ingestion error handling strategy</td><td>Silent partial failures undermine "trusted answers" claim</td></tr>
+            <tr><td>5</td><td>H01 — Decide LlamaIndex vs. custom pipeline</td><td>Not swappable after first sprint</td></tr>
+            <tr><td>6</td><td>M02 — Resolve multi-project access model</td><td>Blocks project switcher — Phase 1 blocker</td></tr>
+            <tr><td>7</td><td>H11 — Specify chunk_id derivation exactly</td><td>Deduplication contract must be set before ingestion code</td></tr>
+            <tr><td>8</td><td>M10 — List all required .env variables</td><td>Missing vars = client runtime errors on first deploy</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-orange">Before first client demo</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Issue</th></tr></thead>
+          <tbody>
+            <tr><td>9</td><td>H07 — CORS, rate limiting, upload security spec</td></tr>
+            <tr><td>10</td><td>H08 — Ollama network isolation in docker-compose spec</td></tr>
+            <tr><td>11</td><td>H09 — WhatsApp format registry + test fixtures</td></tr>
+            <tr><td>12</td><td>H10 — Add testing tasks to todo.md</td></tr>
+            <tr><td>13</td><td>H13 — LLM inference parameter spec (timeout, retry, stop sequences)</td></tr>
+            <tr><td>14</td><td>M09 — Update .gitignore with Node/frontend and ChromaDB patterns</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-yellow">Before first paying client</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Issue</th></tr></thead>
+          <tbody>
+            <tr><td>15</td><td>C04 — Full JWT security spec (expiry, revocation, rotation)</td></tr>
+            <tr><td>16</td><td>H14 — Full disaster recovery procedure</td></tr>
+            <tr><td>17</td><td>H06 — JWT_SECRET auto-generation task in todo</td></tr>
+            <tr><td>18</td><td>M01 — License key validation design in open-questions</td></tr>
+            <tr><td>19</td><td>H12 — End-user documentation tasks in todo</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

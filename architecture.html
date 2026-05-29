@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Architecture</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Pre-Implementation</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html"><span class="icon">⬛</span> Dashboard</a>
+    <a href="roadmap.html"><span class="icon">🗺</span> Roadmap</a>
+    <div class="nav-section">Technical</div>
+    <a href="architecture.html" class="active"><span class="icon">🏗</span> Architecture</a>
+    <a href="decisions.html"><span class="icon">🔒</span> Decisions</a>
+    <div class="nav-section">Tracking</div>
+    <a href="tracking.html"><span class="icon">🐛</span> Bugs &amp; Questions</a>
+    <a href="audit.html"><span class="icon">🔍</span> Audit</a>
+  </nav>
+  <div class="sidebar-footer">Last updated: 2026-05-29</div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>System Architecture</h1>
+    <p>Module map, data flow, tech stack, and deployment configuration for NEXUS.</p>
+  </div>
+
+  <div class="section">
+    <h2>Data Flow</h2>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+flowchart TD
+    subgraph Ingestion
+        A[Document Upload<br/>WhatsApp / PDF / Excel / DOCX / P&ID] --> B[Parser per type]
+        B --> C[Metadata Tagger]
+        C --> D[Chunker per type]
+        D --> E[Embedder<br/>multilingual-e5-large]
+        E --> F[VectorStore.upsert]
+    end
+
+    subgraph ContextStore["Context Store"]
+        F --> G[(ChromaDB<br/>nexus_project_N)]
+        F --> H[(SQLite FTS5<br/>nexus_project_N.db)]
+    end
+
+    subgraph Query
+        I[User Query] --> J{hybrid_query router}
+        J -->|alphanumeric tag / code| K[FTS5 exact search]
+        J -->|natural language| L[ChromaDB semantic search]
+        K --> M[Merge + deduplicate]
+        L --> M
+        M --> N[Response Builder<br/>Qwen2.5-7B via Ollama]
+        N --> O[Answer + Citations]
+    end
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Module Map</h2>
+    <div class="module-grid">
+      <div class="module-card">
+        <h4>whatsapp_parser.py</h4>
+        <p>iOS + Android format detection. Bahasa-aware. Date/author extraction.</p>
+        <div class="file">backend/ingestion/whatsapp_parser.py</div>
+      </div>
+      <div class="module-card">
+        <h4>pdf_parser.py</h4>
+        <p>PyMuPDF text + table extraction. Section-aware chunking. P&amp;ID tag regex.</p>
+        <div class="file">backend/ingestion/pdf_parser.py</div>
+      </div>
+      <div class="module-card">
+        <h4>excel_parser.py</h4>
+        <p>Row-aware chunking. Column headers prepended to each row chunk.</p>
+        <div class="file">backend/ingestion/excel_parser.py</div>
+      </div>
+      <div class="module-card">
+        <h4>docx_parser.py</h4>
+        <p>Section-aware parsing. Numbered step preservation for SOPs.</p>
+        <div class="file">backend/ingestion/docx_parser.py</div>
+      </div>
+      <div class="module-card">
+        <h4>pid_parser.py</h4>
+        <p>Regex tag extraction. Pattern: <code>[A-Z]{1,4}-\d{3,4}</code>. Chunk per tag region.</p>
+        <div class="file">backend/ingestion/pid_parser.py</div>
+      </div>
+      <div class="module-card">
+        <h4>metadata_tagger.py</h4>
+        <p>Assigns source_type, authority_level, project_id, timestamp to every chunk.</p>
+        <div class="file">backend/ingestion/metadata_tagger.py</div>
+      </div>
+      <div class="module-card">
+        <h4>ingestion_pipeline.py</h4>
+        <p>Orchestrator: routes to parser → tagger → embedder → VectorStore. Runs via BackgroundTasks.</p>
+        <div class="file">backend/ingestion/ingestion_pipeline.py</div>
+      </div>
+      <div class="module-card">
+        <h4>vector_store.py</h4>
+        <p>ChromaDB wrapper + SQLite FTS5 hybrid index. Atomic upsert. hybrid_query() router.</p>
+        <div class="file">backend/context_store/vector_store.py</div>
+      </div>
+      <div class="module-card">
+        <h4>query_engine.py</h4>
+        <p>Entry point for queries. Routes to hybrid_query(). Returns QueryResult with chunks + detected tags.</p>
+        <div class="file">backend/query/query_engine.py</div>
+      </div>
+      <div class="module-card">
+        <h4>response_builder.py</h4>
+        <p>Formats context into Qwen2.5-7B prompt. Returns answer + source citations. Confidence = mean cosine similarity.</p>
+        <div class="file">backend/query/response_builder.py</div>
+      </div>
+      <div class="module-card">
+        <h4>authority_ranker.py</h4>
+        <p>Phase 2. Scores chunks by authority level. Configurable hierarchy per project.</p>
+        <div class="file">backend/context_store/authority_ranker.py</div>
+      </div>
+      <div class="module-card">
+        <h4>conflict_resolver.py</h4>
+        <p>Phase 2. Detects contradictory claims. TRUSTED / SUPERSEDED labels.</p>
+        <div class="file">backend/context_store/conflict_resolver.py</div>
+      </div>
+      <div class="module-card">
+        <h4>intent_detector.py</h4>
+        <p>Phase 3. Classifies query intent by user role. Filters retrieved facets.</p>
+        <div class="file">backend/query/intent_detector.py</div>
+      </div>
+      <div class="module-card">
+        <h4>main.py</h4>
+        <p>FastAPI app. Auth, ingestion, query, project, user routes. JWT middleware. CORS.</p>
+        <div class="file">backend/main.py</div>
+      </div>
+      <div class="module-card">
+        <h4>React Frontend</h4>
+        <p>Project switcher, chat UI, citation panel, upload zone, login screen.</p>
+        <div class="file">frontend/src/</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Tech Stack</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Technology</th><th>Purpose</th><th>Phase</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>LLM</td><td><code>Qwen2.5-7B</code> via Ollama</td><td>Answer generation — SEA multilingual (Bahasa + English)</td><td><span class="badge badge-blue">Phase 1</span></td></tr>
+          <tr><td>Embeddings</td><td><code>multilingual-e5-large</code></td><td>1024d vectors — Bahasa Indonesia, Malay, Filipino, English</td><td><span class="badge badge-blue">Phase 1</span></td></tr>
+          <tr><td>Vector Store</td><td>ChromaDB</td><td>Semantic search — one collection per project</td><td><span class="badge badge-blue">Phase 1</span></td></tr>
+          <tr><td>Exact Search</td><td>SQLite FTS5</td><td>Alphanumeric tag / part number precision (AT-201, CBL-001-HV)</td><td><span class="badge badge-blue">Phase 1</span></td></tr>
+          <tr><td>Backend</td><td>FastAPI</td><td>REST API, JWT auth, BackgroundTasks for ingestion</td><td><span class="badge badge-blue">Phase 1</span></td></tr>
+          <tr><td>Frontend</td><td>React + Tailwind CSS</td><td>Chat UI, project switcher, upload zone</td><td><span class="badge badge-blue">Phase 1</span></td></tr>
+          <tr><td>PDF parsing</td><td>PyMuPDF</td><td>Text + table extraction from engineering PDFs</td><td><span class="badge badge-blue">Phase 1</span></td></tr>
+          <tr><td>Authority Ranking</td><td>Custom (Python)</td><td>Configurable hierarchy per project</td><td><span class="badge badge-purple">Phase 2</span></td></tr>
+          <tr><td>Conflict Detection</td><td>Custom + Qwen2.5-7B</td><td>TRUSTED / SUPERSEDED labels on contradictory sources</td><td><span class="badge badge-purple">Phase 2</span></td></tr>
+          <tr><td>Task Queue</td><td>Celery (if needed)</td><td>Phase 1: BackgroundTasks; Phase 2+: Celery if queue depth grows</td><td><span class="badge badge-purple">Phase 2+</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Deployment</h2>
+    <div class="cards cards-2">
+      <div class="card">
+        <h2>Online (Default)</h2>
+        <pre><code>git clone [private repo]
+cp .env.example .env
+# edit .env: JWT_SECRET, admin credentials
+docker-compose up -d
+# Ollama auto-pulls qwen2.5:7b + multilingual-e5-large
+# ~5.6 GB download on first run</code></pre>
+        <div class="sub">Reference spec: DigitalOcean Singapore · 16 GB RAM · 8 vCPU · ~$96/mo</div>
+      </div>
+      <div class="card">
+        <h2>Offline / Air-Gapped</h2>
+        <pre><code># On internet-connected machine:
+./scripts/package-models.sh
+# produces nexus-models.tar + nexus-images.tar
+
+# Transfer to air-gapped site, then:
+docker load -i nexus-images.tar
+docker run --rm -v nexus_ollama:/root/.ollama \
+  alpine tar -xf /mnt/nexus-models.tar -C /
+docker-compose -f docker-compose.yml \
+  -f docker-compose.offline.yml up -d</code></pre>
+        <div class="sub">No internet required after initial package preparation</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Hybrid Query Routing</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">Dense embeddings cannot reliably distinguish <code>AT-201</code> from <code>AT-202</code>. The hybrid router uses FTS5 for exact alphanumeric identifiers and ChromaDB for natural language queries.</p>
+    <div class="mermaid-wrap">
+      <div class="mermaid">
+graph TD
+    Q[User query] --> ROUTE{Contains alphanumeric<br/>tag or code?}
+    ROUTE -->|YES - AT-201, CBL-001-HV, PO-2024| FTS[SQLite FTS5<br/>exact search<br/>100% precision]
+    ROUTE -->|NO - natural language| SEM[ChromaDB<br/>semantic search<br/>top-k cosine similarity]
+    FTS --> MERGE[Merge + deduplicate<br/>FTS results rank above semantic]
+    SEM --> MERGE
+    MERGE --> RB[Response Builder<br/>Qwen2.5-7B]
+      </div>
+    </div>
+    <pre><code>EXACT_PATTERN = re.compile(r'\b[A-Z]{1,4}-\d{3,4}[A-Z]?\b|\bCBL-\w+\b|\bPO-\d+\b')
+
+def route_query(query_text: str) -> str:
+    if EXACT_PATTERN.search(query_text):
+        return "fts"   # precision-first: AT-201, PO-2024-003
+    return "semantic"  # recall-first: natural language queries</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>Chunk Metadata Schema</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">Every chunk stored in ChromaDB carries this metadata. Also written to SQLite FTS5 for hybrid search.</p>
+    <pre><code>{
+    "chunk_id":         str,   # SHA256 of content + source_file (no timestamp — deduplication key)
+    "source_file":      str,   # Original filename
+    "source_type":      str,   # "whatsapp" | "pdf" | "excel" | "docx" | "pid" | "eml"
+    "project_id":       str,
+    "authority_level":  int,   # 1–5; lower = higher authority
+    "author":           str | None,  # WhatsApp and email
+    "timestamp":        str,   # ISO 8601; document date or message date
+    "section_title":    str | None,
+    "instrument_tags":  list[str] | None,  # P&ID tags: ["AT-201", "FT-101"]
+    "ingested_at":      str,   # ISO 8601; when indexed
+}</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>Default Authority Hierarchy (D07)</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">Configurable per project by PM admin. Lower number = higher authority.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Level</th><th>Source Type</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge badge-red">1</span></td><td>Signed Engineering Change Orders (ECO)</td><td>Highest authority — formal approval</td></tr>
+          <tr><td><span class="badge badge-orange">2</span></td><td>Approved vendor datasheets</td><td>Manufacturer specifications</td></tr>
+          <tr><td><span class="badge badge-yellow">3</span></td><td>Internal SOPs (latest version)</td><td>Current operating procedures</td></tr>
+          <tr><td><span class="badge badge-blue">4</span></td><td>WhatsApp decisions (timestamped, from project lead)</td><td>Field communications</td></tr>
+          <tr><td><span class="badge badge-gray">5</span></td><td>Drafts and old revisions</td><td>Lowest authority — superseded material</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</body>
+</html>

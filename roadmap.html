@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Roadmap</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Pre-Implementation</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html"><span class="icon">⬛</span> Dashboard</a>
+    <a href="roadmap.html" class="active"><span class="icon">🗺</span> Roadmap</a>
+    <div class="nav-section">Technical</div>
+    <a href="architecture.html"><span class="icon">🏗</span> Architecture</a>
+    <a href="decisions.html"><span class="icon">🔒</span> Decisions</a>
+    <div class="nav-section">Tracking</div>
+    <a href="tracking.html"><span class="icon">🐛</span> Bugs &amp; Questions</a>
+    <a href="audit.html"><span class="icon">🔍</span> Audit</a>
+  </nav>
+  <div class="sidebar-footer">Last updated: 2026-05-29</div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Roadmap</h1>
+    <p>All implementation tasks organized by phase. Status: <code>[ ]</code> not started · <code>[~]</code> in progress · <code>[x]</code> done · <code>[!]</code> blocked · <code>[-]</code> deferred.</p>
+  </div>
+
+  <!-- Phase 1 -->
+  <div class="section">
+    <h2>Phase 1 — Working MVP</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 20px;">Goal: A working local deployment a power user can use on a real project. PM can upload docs, ask questions, get cited answers, switch between projects.</p>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-blue">Infrastructure &amp; DevOps</span></h3>
+      <ul class="task-list">
+        <li><span class="check"></span><span><code>docker-compose.yml</code> — all services: FastAPI, ChromaDB, Ollama, React</span></li>
+        <li><span class="check"></span><span><code>docker-compose.offline.yml</code> — override for air-gapped sites (skips Ollama model pull)</span></li>
+        <li><span class="check"></span><span><code>scripts/package-models.sh</code> — pre-packages Ollama models as tarball for offline transfer</span></li>
+        <li><span class="check"></span><span>Ollama service with automatic model pull on first run (<code>qwen2.5:7b</code> + <code>multilingual-e5-large</code>)</span></li>
+        <li><span class="check"></span><span>Named Docker volumes for ChromaDB AND FTS5 persistence</span></li>
+        <li><span class="check"></span><span><code>.env.example</code> with all required variables documented</span></li>
+        <li><span class="check"></span><span>Daily snapshot script for ChromaDB AND FTS5 databases</span></li>
+        <li><span class="check"></span><span><code>/health</code> endpoint on FastAPI returning service status</span></li>
+        <li><span class="check"></span><span>Setup guide for DigitalOcean Singapore 16GB Droplet (step-by-step)</span></li>
+      </ul>
+    </div>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-orange">Backend — Ingestion</span></h3>
+      <ul class="task-list">
+        <li><span class="check"></span><span><code>whatsapp_parser.py</code> — iOS + Android format support, Bahasa-aware, date/author extraction</span></li>
+        <li><span class="check"></span><span><code>pdf_parser.py</code> — text extraction via PyMuPDF, table extraction, section-aware chunking</span></li>
+        <li><span class="check"></span><span><code>excel_parser.py</code> — row-aware chunking with column headers prepended</span></li>
+        <li><span class="check"></span><span><code>docx_parser.py</code> — section-aware parsing, numbered step preservation</span></li>
+        <li><span class="check"></span><span><code>pid_parser.py</code> — regex tag extraction (AT-201, FT-101, PV-305 patterns)</span></li>
+        <li><span class="check"></span><span><code>metadata_tagger.py</code> — assigns source type, authority level, project_id, timestamp</span></li>
+        <li><span class="check"></span><span><code>ingestion_pipeline.py</code> — orchestrates parsers, chunker, embedder, ChromaDB write</span></li>
+        <li><span class="check"></span><span>Incremental re-ingestion: file hash detection, skip unchanged files</span></li>
+        <li><span class="check"></span><span>Ingestion status API: returns progress, errors, chunk count per document</span></li>
+      </ul>
+    </div>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-purple">Backend — Context Store</span></h3>
+      <ul class="task-list">
+        <li><span class="check"></span><span><code>vector_store.py</code> — ChromaDB wrapper, collection-per-project, CRUD for chunks</span></li>
+        <li><span class="check"></span><span>Collection naming: <code>nexus_project_{project_id}</code></span></li>
+        <li><span class="check"></span><span>Embedding via <code>multilingual-e5-large</code> — dimension must be set consistently</span></li>
+        <li><span class="check"></span><span>SQLite FTS5 hybrid index — one <code>.db</code> per project at <code>/app/data/fts/</code></span></li>
+        <li><span class="check"></span><span>FTS5: <code>chunks_fts</code> virtual table with <code>chunk_id</code>, <code>content</code>, <code>instrument_tags</code>, <code>part_numbers</code></span></li>
+        <li><span class="check"></span><span><code>upsert()</code> must write to both ChromaDB and FTS5 atomically</span></li>
+        <li><span class="check"></span><span><code>hybrid_query()</code> routes to FTS5 for alphanumeric queries, semantic search otherwise</span></li>
+      </ul>
+    </div>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-blue">Backend — Query</span></h3>
+      <ul class="task-list">
+        <li><span class="check"></span><span><code>query_engine.py</code> — uses <code>VectorStore.hybrid_query()</code> as primary entry point</span></li>
+        <li><span class="check"></span><span>Background ingestion worker — FastAPI <code>BackgroundTasks</code> for file processing</span></li>
+        <li><span class="check"></span><span><code>response_builder.py</code> — formats LLM answer + source citations</span></li>
+      </ul>
+    </div>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-green">Backend — API</span></h3>
+      <ul class="task-list">
+        <li><span class="check"></span><span><code>main.py</code> — FastAPI app setup, middleware, CORS</span></li>
+        <li><span class="check"></span><span>Auth routes: login, token refresh, JWT issue with <code>project_id</code> + <code>role</code></span></li>
+        <li><span class="check"></span><span>Ingestion routes: upload document, trigger re-ingest, ingestion status</span></li>
+        <li><span class="check"></span><span>Query routes: submit query, get answer + sources</span></li>
+        <li><span class="check"></span><span>Project routes: create, list, switch active project</span></li>
+        <li><span class="check"></span><span>User routes: create user, assign role</span></li>
+        <li><span class="check"></span><span><code>schemas.py</code> — Pydantic models for all request/response bodies</span></li>
+      </ul>
+    </div>
+
+    <div class="phase-block">
+      <h3><span class="badge badge-yellow">Frontend</span></h3>
+      <ul class="task-list">
+        <li><span class="check"></span><span>Project switcher component — dropdown/sidebar, updates active <code>project_id</code> in session</span></li>
+        <li><span class="check"></span><span>Chat interface — query input, streaming or polling response display</span></li>
+        <li><span class="check"></span><span>Source citation panel — document, page/line, date, authority level per source</span></li>
+        <li><span class="check"></span><span>Upload zone — drag-and-drop or file picker for all supported document types</span></li>
+        <li><span class="check"></span><span>Ingestion status indicator — shows progress or last-indexed timestamp</span></li>
+        <li><span class="check"></span><span>Login screen — JWT-based auth</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="section">
+    <h2>Phase 2 — Conflict Resolution</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 20px;">Goal: NEXUS detects when two sources contradict each other and surfaces both with authority labels. Success: a query returning conflicting specs shows TRUSTED and SUPERSEDED labels with sources.</p>
+
+    <div class="phase-block">
+      <ul class="task-list">
+        <li><span class="check"></span><span>Authority level metadata field on every chunk (default hierarchy from D07)</span></li>
+        <li><span class="check"></span><span>PM admin UI: configure authority hierarchy per project</span></li>
+        <li><span class="check"></span><span><code>authority_ranker.py</code> — assigns authority score to each retrieved chunk</span></li>
+        <li><span class="check"></span><span><code>conflict_resolver.py</code> — detects chunks with contradictory claims on the same topic</span></li>
+        <li><span class="check"></span><span>TRUSTED / SUPERSEDED labels in response output</span></li>
+        <li><span class="check"></span><span>Document version tracking — detect when newer version supersedes older</span></li>
+        <li><span class="check"></span><span>Confidence signal: cosine similarity of top-k chunks, displayed alongside each source</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="section">
+    <h2>Phase 3 — Roles &amp; Intent</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 20px;">Goal: Same question from different roles returns different facets of the answer. Success: Procurement engineer gets part number + lead time; field tech gets diameter + hazard rating.</p>
+
+    <div class="phase-block">
+      <ul class="task-list">
+        <li><span class="check"></span><span><code>intent_detector.py</code> — classifies query intent based on user role and query text</span></li>
+        <li><span class="check"></span><span>Role-specific retrieval: query engine passes role context to retrieval and response building</span></li>
+        <li><span class="check"></span><span>Admin panel: user management (create, assign role, deactivate)</span></li>
+        <li><span class="check"></span><span>Admin panel: project management (create, configure authority hierarchy)</span></li>
+        <li><span class="check"></span><span>Async query mode: user submits query, gets notified when answer is ready</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="section">
+    <h2>Phase 4 — Commercial Layer</h2>
+    <p style="color: var(--muted); font-size: 13px; margin-bottom: 20px;">Goal: NEXUS is ready to sell as a packaged annual license product.</p>
+
+    <div class="phase-block">
+      <ul class="task-list">
+        <li><span class="check"></span><span>License key mechanism: annual time-limited key, per-installation</span></li>
+        <li><span class="check"></span><span>Update delivery: one-command update (<code>docker-compose pull &amp;&amp; docker-compose up -d</code>)</span></li>
+        <li><span class="check"></span><span>Changelog: versioned release notes, client-readable</span></li>
+        <li><span class="check"></span><span>White-label: configurable logo, color scheme, custom domain via <code>.env</code></span></li>
+        <li><span class="check"></span><span>PM usage dashboard: queries/day, documents indexed, last ingestion timestamp, staleness alert</span></li>
+        <li><span class="check"></span><span>Multi-project dashboard: overview of all projects and their status</span></li>
+        <li><span class="check"></span><span>Node-RED flow ingestion: <code>.json</code> flow files → natural language description chunks</span></li>
+        <li><span class="check"></span><span>Advanced P&amp;ID parsing: OCR-based tag extraction for scanned P&amp;IDs</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Backlog -->
+  <div class="section">
+    <h2>Backlog (No Phase Assigned)</h2>
+    <div class="phase-block">
+      <ul class="task-list">
+        <li><span class="check"></span><span>Email thread ingestion (<code>.eml</code> format, thread-aware chunking)</span></li>
+        <li><span class="check"></span><span>Slack export ingestion (similar structure to WhatsApp)</span></li>
+        <li><span class="check"></span><span>API documentation (OpenAPI/Swagger auto-generated)</span></li>
+        <li><span class="check"></span><span>Backup restore tooling: restore ChromaDB snapshot from object storage</span></li>
+        <li><span class="check"></span><span>Multi-language UI (Bahasa Indonesia translation)</span></li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
