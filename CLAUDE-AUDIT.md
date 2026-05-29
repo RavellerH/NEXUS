@@ -8,9 +8,41 @@
 
 ---
 
+## Addendum — Cross-Audit Findings (GEMINI-AUDIT.md)
+
+After reviewing `GEMINI-AUDIT.md` (Antigravity AI / Gemini 3.5 Flash), two findings from that audit were confirmed as valid gaps not covered here. Both have been applied to the docs.
+
+### GA01 — Air-Gap Paradox ✅ Applied
+
+**Gemini finding**: NEXUS markets "No cloud. No data leaks." but the default setup pulls ~5.6 GB from the internet on first run. Industrial EPC sites and refineries in SEA frequently operate behind strict firewalls with no outbound internet. The online-first default is a direct contradiction of the air-gapped security claim for these clients.
+
+**Applied to**:
+- `docs/business/infrastructure.md` — added "Air-gap paradox" section with two deployment paths (online default + offline override), `docker-compose.offline.yml` spec, and `scripts/package-models.sh` description
+- `docs/todo.md` — added offline bootstrap tasks to Phase 1
+
+### GA02 — Hybrid SQLite FTS5 Index for Alphanumeric Precision ✅ Applied
+
+**Gemini finding**: Dense embeddings (`multilingual-e5-large`) cannot reliably distinguish `AT-201` from `AT-202`, `CBL-001-HV-4` from `CBL-001-HV-3`, or similar exact alphanumeric identifiers. Semantic search on instrument tags, part numbers, and PO numbers produces wrong results with high confidence scores.
+
+**Applied to**:
+- `docs/modules/context-store/vector-store.md` — added full Hybrid Index section: SQLite FTS5 schema, query routing logic (`EXACT_PATTERN` regex), `fts_search()` and `hybrid_query()` interface additions, and FTS5 storage spec
+- `docs/modules/query/query-engine.md` — updated query flow to use `hybrid_query()` as primary entry point; updated Mermaid diagram to show FTS5 routing
+- `docs/todo.md` — updated context-store and query tasks to reflect hybrid index requirements
+
+### Other valid Gemini findings (not yet applied — require design decisions)
+
+| Finding | Status | Notes |
+|---------|--------|-------|
+| Conflict resolver false positives (complementary ≠ contradictory) | Open | Semantic similarity > 0.85 will flag `"AT-201 measures gas"` + `"AT-201 runs on 24V"` as a conflict. Needs a two-stage filter: similarity check, then explicit contradiction check. Add to Phase 2 conflict-resolver spec. |
+| Intent detector embedding skew | Open | Appending role facet strings to the query before embedding shifts the vector direction. Log as open question for Phase 3 design. |
+| Background ingestion worker | Open | FastAPI `BackgroundTasks` added to todo.md. Full Celery spec deferred to Phase 2+. |
+| ChromaDB plain-text storage at rest | Open | No encryption on the SQLite file inside the Docker volume. Mitigation: full-disk encryption at VPS level (DigitalOcean volume encryption). Document in infrastructure.md. |
+
+---
+
 ## Executive Summary
 
-34 issues found across 10 categories. No implementation code exists yet, so all issues are in documentation, design specs, and planning files. **5 issues are critical** — they will cause implementation failures or rework if not resolved before coding starts.
+36 issues found across 10 categories (34 original + 2 from cross-audit). No implementation code exists yet, so all issues are in documentation, design specs, and planning files. **5 issues are critical** — they will cause implementation failures or rework if not resolved before coding starts.
 
 ### Severity Counts
 

@@ -65,13 +65,48 @@ volumes:
   nexus_ollama:     # Model weights cache
 ```
 
-### First-run model pull
+### First-run model pull (online)
 
 On first `docker-compose up`, the `ollama` service automatically pulls:
-- `qwen2.5:7b` — LLM for answer generation
-- `intfloat/multilingual-e5-large` — embedding model
+- `qwen2.5:7b` — LLM for answer generation (~4.5 GB)
+- `intfloat/multilingual-e5-large` — embedding model (~1.1 GB)
 
 This requires internet access on first run only. Subsequent runs are fully offline.
+
+---
+
+### Air-gap paradox — Offline bootstrap support
+
+> **Critical**: NEXUS markets itself as "No cloud. No data leaks." But the default setup pulls ~5.6 GB from the internet on first run. Industrial EPC sites, refineries, and CEMS facilities in SEA often sit behind strict firewalls with no outbound internet access. The online-first default directly contradicts the air-gapped security claim for these clients.
+
+**Two deployment paths must be supported:**
+
+**Path A — Online (default)**
+```bash
+# Requires outbound internet on first run
+docker-compose up -d
+# Ollama pulls models automatically (~5.6 GB, ~10–20 min depending on connection)
+```
+
+**Path B — Offline (air-gapped)**
+```bash
+# Run once on a machine WITH internet to pre-package models
+./scripts/package-models.sh
+# Produces: nexus-models.tar (~5.6 GB) and nexus-images.tar
+
+# Transfer both tarballs to the air-gapped VPS (USB, secure file transfer)
+# Then on the air-gapped server:
+docker load -i nexus-images.tar
+docker run --rm -v nexus_ollama:/root/.ollama alpine tar -xf /mnt/nexus-models.tar -C /
+docker-compose -f docker-compose.yml -f docker-compose.offline.yml up -d
+```
+
+**What `docker-compose.offline.yml` does**: Overrides the Ollama service to skip model pull on startup and use the pre-loaded volume instead.
+
+**Tasks required** (see [todo.md → Phase 1](../../todo.md)):
+- `scripts/package-models.sh` — pulls models on internet machine, tars them
+- `docker-compose.offline.yml` — override file disabling auto-pull
+- Setup guide section: "Deploying on Air-Gapped Networks"
 
 ---
 

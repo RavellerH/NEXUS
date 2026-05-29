@@ -37,11 +37,13 @@ related:
 
 ### Infrastructure & DevOps
 
-- [ ] `docker-compose.yml` — includes all services: FastAPI, ChromaDB, Ollama, React
+- [ ] `docker-compose.yml` — includes all services: FastAPI, ChromaDB, Ollama, React (online path)
+- [ ] `docker-compose.offline.yml` — override for air-gapped sites (skips Ollama model pull)
+- [ ] `scripts/package-models.sh` — pre-packages Ollama models as tarball for offline transfer
 - [ ] Ollama service with automatic model pull on first run (`qwen2.5:7b` + `multilingual-e5-large`)
-- [ ] Named Docker volumes for ChromaDB persistence
+- [ ] Named Docker volumes for ChromaDB AND FTS5 persistence
 - [ ] `.env.example` with all required variables documented
-- [ ] Daily ChromaDB snapshot script (cron job or container sidecar)
+- [ ] Daily snapshot script for ChromaDB AND FTS5 databases (cron job or container sidecar)
 - [ ] `/health` endpoint on FastAPI returning service status
 - [ ] Setup guide for DigitalOcean Singapore 16GB Droplet (step-by-step, terminal commands)
 
@@ -68,12 +70,19 @@ related:
   - See spec: [modules/context-store/vector-store.md](./modules/context-store/vector-store.md)
 - [ ] Collection naming: `nexus_project_{project_id}`
 - [ ] Embedding via `multilingual-e5-large` — dimension must be set consistently
+- [ ] SQLite FTS5 hybrid index — one `.db` per project at `/app/data/fts/`
+  - Schema: `chunks_fts` virtual table with `chunk_id`, `content`, `instrument_tags`, `part_numbers`
+  - `upsert()` must write to both ChromaDB and FTS5 atomically
+  - `hybrid_query()` routes to FTS5 for alphanumeric queries, semantic search otherwise
+  - See spec: [modules/context-store/vector-store.md → Hybrid Index](./modules/context-store/vector-store.md)
 
 ### Backend — Query
 
-- [ ] `query_engine.py` — semantic search against active project collection
+- [ ] `query_engine.py` — uses `VectorStore.hybrid_query()` as primary entry point
   - See spec: [modules/query/query-engine.md](./modules/query/query-engine.md)
-- [ ] Tag-based retrieval for instrument tags (complements semantic search)
+- [ ] Background ingestion worker — use FastAPI `BackgroundTasks` for file processing
+  - Ingesting a large PDF or BOM in a request thread will timeout the gateway
+  - Phase 1: `BackgroundTasks`; Phase 2+: Celery if queue depth grows
 - [ ] `response_builder.py` — formats LLM answer + source citations
   - See spec: [modules/query/response-builder.md](./modules/query/response-builder.md)
 
