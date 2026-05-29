@@ -155,6 +155,70 @@ PyMuPDF returns empty text for scanned (image-only) PDFs. Many P&IDs and older v
 
 ---
 
+## T12 — WhatsApp Context Fragmentation & Threading Fragility
+
+**Severity**: High
+**Status**: Open
+**Phase**: 1 & 2
+**Module**: [whatsapp-parser.md](../modules/ingestion/whatsapp-parser.md)
+**Reported**: 2026-05-29
+
+### Description
+Splitting WhatsApp message exports strictly message-by-message or using static chronological windows breaks non-linear conversation threads. In safety-critical or vendor negotiation situations, a message like "Sudah confirm, ganti tipe B" is completely stripped of context (i.e. which vendor or tag Budi was replying to) if retrieved in isolation.
+
+### Fix
+Upgrade the WhatsApp parser to utilize overlapping sliding windows of 15–20 messages during ingestion, reconstruct thread structures using reply-to references when present, and inject context-bearing global headers into every chat chunk.
+
+---
+
+## T13 — Dense Vector Blindness on Precise Alphanumeric Loop & Part Codes
+
+**Severity**: High
+**Status**: Open
+**Phase**: 1
+**Module**: [vector-store.md](../modules/context-store/vector-store.md)
+**Reported**: 2026-05-29
+
+### Description
+Dense embeddings (`multilingual-e5-large`) compress semantic meaning but are notoriously poor at distinguishing between exact, alphanumeric technical identifiers (e.g. `CBL-001-HV-4` vs `CBL-001-HV-3` or `AT-201` vs `AT-202`).
+
+### Fix
+Implement a hybrid search engine combining the dense vector database with a lightweight, FTS5 full-text sparse keyword index (e.g. SQLite BM25). Integrate technical tag extraction at query time and perform Reciprocal Rank Fusion (RRF) to prioritize exact keyword matches.
+
+---
+
+## T14 — High CPU Query Latency from Pairwise Contradiction Analysis
+
+**Severity**: High
+**Status**: Open
+**Phase**: 2
+**Module**: [conflict-resolver.md](../modules/context-store/conflict-resolver.md)
+**Reported**: 2026-05-29
+
+### Description
+Evaluating potential contradictions between retrieved document chunks on-the-fly using a CPU-bound 7B local LLM inside the real-time query loop introduces unacceptable latencies (exceeding several minutes).
+
+### Fix
+Shift contradiction evaluations to an asynchronous background worker triggered immediately post-ingestion. Scan high-similarity chunk clusters, pre-compute conflicts offline via the local LLM, and store flagged conflicts in a local relational table for sub-millisecond query-time lookups.
+
+---
+
+## T15 — Danger of Safety Information Omission via Role-Aware Intent Detection
+
+**Severity**: High
+**Status**: Open
+**Phase**: 3
+**Module**: [intent-detector.md](../modules/query/intent-detector.md)
+**Reported**: 2026-05-29
+
+### Description
+Role-based query filtering (e.g. restricting a Procurement user's context entirely to pricing and delivery schedules) risks omitting vital technical safety alerts or standard mismatch notifications. A PM or Procurement Engineer might buy a part that is physically incompatible if safety conflicts are filtered out.
+
+### Fix
+Configure a "Global Safety Override" rule inside the intent detector. Critical safety warnings, hazardous ratings, and physical spec contradictions must bypass role filters and be surfaced regardless of user role.
+
+---
+
 ## Related
 
 - [business.md](./business.md)
