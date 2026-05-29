@@ -316,11 +316,11 @@ pre code { background: none; border: none; padding: 0; color: var(--text); font-
 }
 
 /* ── Marketing / Landing page ───────────────── */
+body.landing {
+  display: block;   /* override global flex; sidebar pages need flex, landing doesn't */
+}
 .landing {
-  width: 100%;
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
 }
 
 /* Top nav */
@@ -365,11 +365,10 @@ pre code { background: none; border: none; padding: 0; color: var(--text); font-
 .lsection {
   max-width: 900px;
   margin: 0 auto;
-  padding: 80px 40px;
+  padding: 72px 40px;
 }
 .lsection.narrow { max-width: 680px; }
 .lsection.wide { max-width: 1100px; }
-.lsection + .lsection { padding-top: 0; }
 
 /* Hero */
 .hero-eyebrow {
@@ -455,14 +454,15 @@ pre code { background: none; border: none; padding: 0; color: var(--text); font-
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .lsection-sub {
   font-size: 15px;
   color: var(--muted);
   line-height: 1.6;
-  margin-bottom: 36px;
+  margin-bottom: 0;
 }
+.lsection-sub + * { margin-top: 36px; }
 
 /* Problem cards */
 .problem-grid {
@@ -499,9 +499,9 @@ pre code { background: none; border: none; padding: 0; color: var(--text); font-
 .steps::before {
   content: '';
   position: absolute;
-  top: 28px;
-  left: calc(16.66% + 16px);
-  right: calc(16.66% + 16px);
+  top: 20px;                     /* center of 40px step-num */
+  left: calc(33.33% / 2 + 20px); /* right edge of circle in col 1 */
+  right: calc(33.33% / 2 + 20px);/* left edge of circle in col 3 */
   height: 1px;
   background: var(--border);
 }
@@ -640,18 +640,25 @@ pre code { background: none; border: none; padding: 0; color: var(--text); font-
 .docs-footer-links a:hover { color: var(--text); border-color: var(--muted); }
 
 /* Responsive marketing */
-@media (max-width: 900px) {
+@media (max-width: 860px) {
   .problem-grid { grid-template-columns: 1fr; }
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
-  .steps { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr; gap: 28px; }
   .steps::before { display: none; }
-  .phase-row { grid-template-columns: 1fr; }
+  .step { text-align: left; }
+  .step-num { margin: 0 0 12px; }
+  .step .file-types { justify-content: flex-start; }
+  .phase-row { grid-template-columns: 1fr; gap: 8px; }
+  .phase-row > :last-child { justify-self: start; }
   .top-nav { padding: 0 20px; }
+  .lsection { padding: 56px 24px; }
+  .lsection.wide { padding: 56px 24px; }
 }
 
-@media (max-width: 640px) {
-  .lsection { padding: 48px 20px; }
+@media (max-width: 560px) {
+  .lsection { padding: 40px 16px; }
   .feature-grid { grid-template-columns: 1fr; }
   .top-nav-links { display: none; }
-  .docs-footer { padding: 24px 20px; }
+  .docs-footer { padding: 24px 16px; }
+  .hero-headline { letter-spacing: -1px; }
 }
