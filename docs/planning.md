@@ -56,6 +56,21 @@ These must be answered before finalizing the system design:
 
 ## Architecture Implications (From Decisions Made)
 
+### Why self-hosted (the business rationale)
+
+SaaS means owning client uptime. One crash, one data migration gone wrong, one memory leak — and product development stops while you firefight. At solo-founder stage, that kills momentum.
+
+Self-hosted shifts responsibility: the client owns their VPS, you own the software. The blame doesn't disappear — it changes form from "your service is down" to "my update broke something" — but it loses urgency and doesn't require you to be on-call.
+
+**The mitigation for shifted blame:**
+- Update must be one command: `docker-compose pull && docker-compose up -d`
+- `/health` endpoint for self-diagnosis
+- Explicit support boundary in license: *"NEXUS is the software. The VPS is yours."*
+- Versioned releases with changelogs — clients choose when to update
+- Policy decision needed: support latest version only, or maintain N-1?
+
+**Version fragmentation risk**: clients will be on different versions. Decide before v1.1: is "update to get support" the policy? If yes, the update process must be frictionless enough that clients actually do it.
+
 ### Self-hosted changes everything
 
 You are shipping a **deployable package**, not running infra. Consequences:
