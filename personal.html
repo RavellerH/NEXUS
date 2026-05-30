@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Personal Context Engine Research</title>
+  <meta name="description" content="What is a personal context engine? How it differs from ChatGPT, how it works, and what NEXUS is building toward — grounded in Karpathy's LLM OS model.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Page-specific styles ── */
+    .personal-hero {
+      padding: 44px 0 36px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+    }
+    .personal-hero .eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #bc8cff;
+      margin-bottom: 12px;
+    }
+    .personal-hero h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+      margin: 0 0 12px;
+    }
+    .personal-hero p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.7;
+      margin: 0 0 18px;
+    }
+    /* Section wrapper */
+    .psection {
+      margin-bottom: 52px;
+    }
+    .psection h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 4px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .psection .sub {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin: 6px 0 20px;
+      line-height: 1.6;
+    }
+    /* Pull quote */
+    .pull-quote {
+      border-left: 3px solid #bc8cff;
+      padding: 14px 20px;
+      margin: 20px 0;
+      background: rgba(188, 140, 255, 0.05);
+      border-radius: 0 6px 6px 0;
+    }
+    .pull-quote p {
+      font-size: 15px;
+      color: var(--text-primary);
+      font-style: italic;
+      line-height: 1.7;
+      margin: 0 0 6px;
+    }
+    .pull-quote .attribution {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    /* TL;DR box */
+    .tldr {
+      background: #0c1f3a;
+      border: 1px solid #1f6feb;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .tldr strong {
+      color: #58a6ff;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 4px;
+    }
+    /* Comparison table */
+    .ctable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .ctable th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    .ctable td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .ctable tr:last-child td { border-bottom: none; }
+    .ctable tr:hover td { background: var(--surface-hover); }
+    .ctable .win { color: #3fb950; font-weight: 600; }
+    .ctable .lose { color: #8b949e; }
+    .ctable .hl td { background: #0c1f3a; }
+    /* LLM OS diagram */
+    .os-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.9;
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+    .os-diagram .box-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #bc8cff;
+      margin-bottom: 12px;
+    }
+    .os-diagram .row { display: flex; gap: 0; }
+    .os-diagram .label { color: #8b949e; min-width: 120px; }
+    .os-diagram .arrow { color: #30363d; margin: 0 8px; }
+    .os-diagram .value { color: var(--text-primary); }
+    .os-diagram .comment { color: #484f58; margin-left: 8px; font-style: italic; }
+    /* Moment cards */
+    .moment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .moment-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .moment-card .number {
+      font-size: 22px;
+      font-weight: 800;
+      color: #bc8cff;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .moment-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 10px;
+    }
+    .moment-card .scenario {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: var(--surface-hover);
+      padding: 10px 12px;
+      border-radius: 4px;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .moment-card .scenario .q { color: #8b949e; }
+    .moment-card .scenario .llm { color: #484f58; }
+    .moment-card .scenario .pce { color: #3fb950; }
+    .moment-card .scenario .lbl {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    /* Architecture diagram */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+    .arch-layer {
+      margin-bottom: 16px;
+      padding-left: 16px;
+      border-left: 2px solid var(--border);
+    }
+    .arch-layer.highlight { border-left-color: #bc8cff; }
+    .arch-layer h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 0 0 4px;
+    }
+    /* PKB grid */
+    .pkb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .pkb-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .pkb-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 6px;
+    }
+    .pkb-card p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin: 0;
+    }
+    /* Roadmap progression */
+    .phase-progression {
+      display: flex;
+      gap: 0;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+    .prog-phase {
+      flex: 1;
+      min-width: 180px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .prog-phase:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--border);
+      z-index: 1;
+      font-size: 16px;
+    }
+    .prog-phase:first-child { border-radius: 8px 0 0 8px; }
+    .prog-phase:last-child { border-radius: 0 8px 8px 0; }
+    .prog-phase.current { border-color: #1f6feb; background: #0c1f3a; }
+    .prog-phase .phase-num {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #8b949e;
+      margin-bottom: 4px;
+    }
+    .prog-phase.current .phase-num { color: #58a6ff; }
+    .prog-phase h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 6px;
+    }
+    .prog-phase p {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin: 0;
+    }
+    hr.pdivider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+    /* Inline code */
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #e3b341;
+    }
+    @media (max-width: 640px) {
+      .moment-grid { grid-template-columns: 1fr; }
+      .pkb-grid { grid-template-columns: 1fr; }
+      .phase-progression { flex-direction: column; }
+      .prog-phase { border-radius: 0; min-width: unset; }
+      .prog-phase:first-child { border-radius: 8px 8px 0 0; }
+      .prog-phase:last-child { border-radius: 0 0 8px 8px; }
+      .prog-phase:not(:last-child)::after { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Personal AI Research</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html"><span class="icon">◀</span> Back to NEXUS</a>
+    <a href="research.html"><span class="icon">◎</span> Research Overview</a>
+    <a href="graph.html"><span class="icon">◎</span> 3D Knowledge Graph</a>
+    <div class="nav-section">On this page</div>
+    <a href="#what-is-context" class="active"><span class="icon">◉</span> What Is Context?</a>
+    <a href="#vs-llm"><span class="icon">◎</span> vs. Common LLM</a>
+    <a href="#karpathy"><span class="icon">◎</span> Karpathy: LLM OS</a>
+    <a href="#pkb"><span class="icon">◎</span> Personal Knowledge Base</a>
+    <a href="#architecture"><span class="icon">◎</span> Architecture</a>
+    <a href="#10x"><span class="icon">◎</span> The 10× Moments</a>
+    <a href="#nexus-roadmap"><span class="icon">◎</span> NEXUS Roadmap</a>
+    <div class="nav-section">Source Files</div>
+    <a href="docs/research/personal-context-engine.md"><span class="icon">◎</span> personal-context-engine.md</a>
+    <a href="docs/research/karpathy-llm-os.md"><span class="icon">◎</span> karpathy-llm-os.md</a>
+    <a href="docs/research/personal-knowledge-base.md"><span class="icon">◎</span> personal-knowledge-base.md</a>
+  </nav>
+  <div class="sidebar-footer">Updated: 2026-05-30</div>
+</aside>
+
+<main class="main-content">
+
+  <!-- Hero -->
+  <div class="personal-hero" id="what-is-context">
+    <div class="eyebrow">Personal Context Engine Research</div>
+    <h1>What Does It Mean for an AI<br>to Truly Know You?</h1>
+    <p>
+      Every session with ChatGPT or Claude starts the same: you are a stranger.
+      The model is brilliant, but it knows nothing about your projects, your past decisions,
+      your thinking style, or your world. A personal context engine changes this.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <span class="badge badge-purple">Personal AI research</span>
+      <span class="badge badge-blue">Based on Karpathy's LLM OS</span>
+      <span class="badge badge-green">Product roadmap for NEXUS</span>
+      <span class="badge badge-gray">Gartner 2025: "Context engineering is in"</span>
+    </div>
+  </div>
+
+  <!-- What is "personal context" -->
+  <section class="psection">
+    <h2>What "Personal Context" Actually Means</h2>
+    <p class="sub">Context is everything the model can see and reason over in a single call. Personal context is the subset specific to one person — their history, decisions, preferences, and world.</p>
+
+    <table class="ctable">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>What it captures</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Episodic</strong></td>
+          <td>Past events and conversations</td>
+          <td style="font-size:12px;color:var(--text-secondary)">"In January I decided to use ChromaDB. Here's why."</td>
+        </tr>
+        <tr>
+          <td><strong>Semantic</strong></td>
+          <td>Facts about your world, projects, people</td>
+          <td style="font-size:12px;color:var(--text-secondary)">"AT-201 is the temperature transmitter on Unit 3."</td>
+        </tr>
+        <tr>
+          <td><strong>Preference</strong></td>
+          <td>How you work and communicate</td>
+          <td style="font-size:12px;color:var(--text-secondary)">"Farhan prefers concise answers with examples."</td>
+        </tr>
+        <tr>
+          <td><strong>Temporal</strong></td>
+          <td>Time-ordered project and decision state</td>
+          <td style="font-size:12px;color:var(--text-secondary)">"This project was on hold in March. Resumed April 15."</td>
+        </tr>
+        <tr>
+          <td><strong>Relational</strong></td>
+          <td>Your people, their roles and context</td>
+          <td style="font-size:12px;color:var(--text-secondary)">"Ahmad is the site engineer on Project Tanjung."</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:13px;color:var(--text-secondary);margin-top:16px;line-height:1.7;">A system that captures and retrieves all five dimensions has personal context. Most current AI tools capture at best one or two. They're great at world knowledge; they know nothing about your world.</p>
+  </section>
+
+  <hr class="pdivider">
+
+  <!-- vs common LLM -->
+  <section class="psection" id="vs-llm">
+    <h2>Personal Context Engine vs. Common LLM</h2>
+    <p class="sub">The difference is not intelligence — it's knowledge of you. A common LLM is an expert stranger. A personal context engine is an expert colleague who has been working with you for years.</p>
+
+    <div class="tldr">
+      <strong>The Expert Stranger Problem</strong>
+      Asking ChatGPT a question is like calling a senior consultant you've never met. They are brilliant and knowledgeable. But they don't know your specific situation, your past decisions, or your constraints. You spend the first half of every call re-explaining context. A personal context engine eliminates re-explanation.
+    </div>
+
+    <table class="ctable">
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th>Common LLM</th>
+          <th>Personal Context Engine</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Knows your name and role</td>
+          <td class="lose">Only if you tell it, every time</td>
+          <td class="win">Always — part of identity block</td>
+        </tr>
+        <tr>
+          <td>Knows your active projects</td>
+          <td class="lose">No</td>
+          <td class="win">Yes — loaded at query time</td>
+        </tr>
+        <tr>
+          <td>Knows your past decisions</td>
+          <td class="lose">No</td>
+          <td class="win">Yes — episodic + semantic memory</td>
+        </tr>
+        <tr>
+          <td>Knows your vocabulary</td>
+          <td class="lose">No — guesses from general context</td>
+          <td class="win">Yes — personal ontology (AT-201, Phase 1...)</td>
+        </tr>
+        <tr>
+          <td>Answers "why did we decide X?"</td>
+          <td class="lose">Cannot — no memory of your decisions</td>
+          <td class="win">Yes — retrieves decision + rationale</td>
+        </tr>
+        <tr>
+          <td>Writes in your voice</td>
+          <td class="lose">Generic style</td>
+          <td class="win">Learned from your past writing</td>
+        </tr>
+        <tr>
+          <td>Connects ideas across months</td>
+          <td class="lose">Cannot — stateless</td>
+          <td class="win">Yes — temporal graph synthesis</td>
+        </tr>
+        <tr>
+          <td>Improves with use</td>
+          <td class="lose">No — same baseline every session</td>
+          <td class="win">Yes — knowledge base and preferences grow</td>
+        </tr>
+        <tr>
+          <td>Surfaces relevant past proactively</td>
+          <td class="lose">Never</td>
+          <td class="win">Yes — when you start a task</td>
+        </tr>
+        <tr>
+          <td>Runs on your data privately</td>
+          <td class="lose">Cloud, data sent to provider</td>
+          <td class="win">Self-hosted — your data never leaves</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:28px 0 12px;">Existing Personal AI Tools and Their Limits</h3>
+    <table class="ctable">
+      <thead>
+        <tr><th>Tool</th><th>What it does well</th><th>Critical gap</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>ChatGPT / Claude</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">World knowledge, reasoning, code</td>
+          <td style="font-size:12px;color:#f0883e">No memory of you. Stateless. Re-explain every session.</td>
+        </tr>
+        <tr>
+          <td><strong>NotebookLM</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Q&A grounded in your uploaded documents</td>
+          <td style="font-size:12px;color:#f0883e">No persistent identity. No episodic memory. Manual uploads.</td>
+        </tr>
+        <tr>
+          <td><strong>Rewind.ai</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Captures everything on your screen + mic</td>
+          <td style="font-size:12px;color:#f0883e">No semantic understanding. No synthesis. Privacy risk.</td>
+        </tr>
+        <tr>
+          <td><strong>Mem.ai</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">AI-organized notes, connections</td>
+          <td style="font-size:12px;color:#f0883e">Limited temporal reasoning. Cloud-only. No personal ontology.</td>
+        </tr>
+        <tr>
+          <td><strong>Notion AI</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">AI within your workspace</td>
+          <td style="font-size:12px;color:#f0883e">No cross-source synthesis. No persistent personal model.</td>
+        </tr>
+        <tr class="hl">
+          <td><strong>NEXUS (future)</strong></td>
+          <td style="font-size:12px;color:#3fb950">Self-hosted · personal ontology · episodic memory</td>
+          <td style="font-size:12px;color:#e3b341">Phase 3–4: currently building toward this</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="pdivider">
+
+  <!-- Karpathy section -->
+  <section class="psection" id="karpathy">
+    <h2>Karpathy's LLM OS Model</h2>
+    <p class="sub">Andrej Karpathy (ex-Tesla AI, ex-OpenAI, founder of Eureka Labs) framed the LLM not as a chatbot but as the CPU of a new kind of operating system. This mental model explains why context engines are necessary.</p>
+
+    <div class="pull-quote">
+      <p>"The context window is the RAM. The weights are the slow hard disk — a vague dream of the internet. The central challenge of AI engineering is figuring out what to put in RAM at the right time."</p>
+      <div class="attribution">Andrej Karpathy — paraphrased from "Intro to Large Language Models" (2023) and related talks</div>
+    </div>
+
+    <div class="os-diagram">
+      <div class="box-title">LLM Operating System</div>
+      <div class="row"><span class="label">CPU</span><span class="arrow">→</span><span class="value">LLM</span><span class="comment">the reasoning engine — stateless per call</span></div>
+      <div class="row"><span class="label">RAM</span><span class="arrow">→</span><span class="value">Context window</span><span class="comment">precious, limited, the real bottleneck</span></div>
+      <div class="row"><span class="label">Hard disk</span><span class="arrow">→</span><span class="value">Weights (trained knowledge)</span><span class="comment">slow, cannot be edited, becomes stale</span></div>
+      <div class="row"><span class="label">Keyboard/Mouse</span><span class="arrow">→</span><span class="value">Text / multimodal input</span><span class="comment"></span></div>
+      <div class="row"><span class="label">Display</span><span class="arrow">→</span><span class="value">Generated output</span><span class="comment"></span></div>
+      <div class="row"><span class="label">Internet</span><span class="arrow">→</span><span class="value">Retrieval + web tools</span><span class="comment">extends knowledge beyond weights</span></div>
+      <div class="row"><span class="label">Running apps</span><span class="arrow">→</span><span class="value">Agent subprocesses</span><span class="comment">code interpreter, tool calls</span></div>
+      <div class="row"><span class="label">Filesystem</span><span class="arrow">→</span><span class="value">Vector stores + personal KB</span><span class="comment">this is where personal context lives</span></div>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bc8cff;margin-bottom:8px;">Karpathy's Actual System — The LLM Wiki</div>
+      <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;">Published as a GitHub Gist in early 2026. Three layers: <strong style="color:var(--text-primary);">Raw Sources</strong> (immutable, what you feed it) → <strong style="color:var(--text-primary);">Wiki Layer</strong> (LLM-maintained Markdown, entity + concept pages, cross-references) → <strong style="color:var(--text-primary);">Schema Layer</strong> (a CLAUDE.md config defining conventions).</p>
+      <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 12px;font-style:italic;">"You rarely ever write or edit the wiki manually. It's the domain of the LLM."</p>
+      <p style="font-size:12px;color:var(--text-muted);margin:0;">Current scale: ~100 articles, ~400,000 words on one domain. Written by no one directly. Longer than most PhD dissertations. Tools: Obsidian + Obsidian Web Clipper + <code>qmd</code> (hybrid BM25/vector search) + Claude Code. Explicitly modeled on Vannevar Bush's 1945 Memex concept — with the LLM solving the maintenance problem Bush couldn't.</p>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:28px 0 12px;">Key Karpathy Insights</h3>
+
+    <table class="ctable">
+      <thead>
+        <tr><th>Insight</th><th>Implication for context engines</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Weights cannot serve as a reliable knowledge store</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Weights hallucinate, become stale, can't be edited. Personal knowledge must come through the context window, not from weights. This is why RAG and context engines exist.</td>
+        </tr>
+        <tr>
+          <td><strong>Context assembly is the core engineering challenge</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Deciding what to put in the context window at query time is not a retrieval problem — it's a system design problem. This is what a context engine solves.</td>
+        </tr>
+        <tr>
+          <td><strong>Tools change everything</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">An LLM with tools can affect the world, not just describe it. Personal context + tool access = the Chief of Staff AI.</td>
+        </tr>
+        <tr>
+          <td><strong>Persistent personal memory makes AI qualitatively different</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Stateless chatbots are a transitional phase. The mature form is a system that knows you over time — Karpathy calls this the "Chief of Staff AI."</td>
+        </tr>
+        <tr>
+          <td><strong>Software 2.0: learn preferences, don't hardcode them</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">A personal context engine should learn how you work from your history — not be explicitly programmed with rules about your style or preferences.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pull-quote" style="border-left-color:#58a6ff;background:rgba(88,166,255,0.04);">
+      <p>"I want an AI that has access to everything I've ever written, thought, or experienced. That can draft emails in my voice, recall what I decided about a problem six months ago, connect a new idea to something I read two years ago."</p>
+      <div class="attribution">Andrej Karpathy — described as the "Chief of Staff AI" in interviews, 2023–2025</div>
+    </div>
+  </section>
+
+  <hr class="pdivider">
+
+  <!-- PKB section -->
+  <section class="psection" id="pkb">
+    <h2>Personal Knowledge Base — The Foundation</h2>
+    <p class="sub">A personal context engine needs something to draw on. The personal knowledge base is that foundation — your curated, linked store of thinking, decisions, and knowledge.</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      A PKB is not Notion + AI. It is a structured graph of atomic ideas, linked by meaning, built up over time. Without a well-structured PKB, a personal context engine has nothing meaningful to ground its answers in.
+    </div>
+
+    <div class="pkb-grid">
+
+      <div class="pkb-card">
+        <h4>Zettelkasten (Luhmann)</h4>
+        <p>One claim per note. Written in your own words. Linked to at least one other note. No hierarchy — only links. Structure emerges from connections, not folders. Luhmann produced 70+ books using this system over 40 years.</p>
+      </div>
+
+      <div class="pkb-card">
+        <h4>PARA (Tiago Forte)</h4>
+        <p>Projects–Areas–Resources–Archives. Action-oriented organization. Everything captured in the context of what you're currently working on. Complementary to Zettelkasten — PARA for actions, Zettelkasten for permanent insight.</p>
+      </div>
+
+      <div class="pkb-card">
+        <h4>Maps of Content (Nick Milo)</h4>
+        <p>A hub note that lists and links other notes on a theme, without containing their content. MOCs surface knowledge clusters without imposing hierarchy. They are the navigation layer of the Zettelkasten.</p>
+      </div>
+
+      <div class="pkb-card">
+        <h4>Progressive Summarization</h4>
+        <p>Layer 0: raw capture. Layer 1: bold key passages. Layer 2: highlight the best. Layer 3: executive summary. Layer 4: permanent note. Only go deeper on notes you return to. Defeats "saved but never read."</p>
+      </div>
+
+      <div class="pkb-card">
+        <h4>The 10K Note Threshold</h4>
+        <p>Most practitioners stop at 10,000 notes. At this scale, SQLite FTS5 + a small embedding model retrieves in under 30ms on a laptop. No Qdrant, no Docker, no distributed system needed. The constraint is discipline, not technology.</p>
+      </div>
+
+      <div class="pkb-card">
+        <h4>Atomic Claim Indexing</h4>
+        <p>The right unit to index is not a document or paragraph — it is a single verifiable claim. "Hybrid RRF outperforms dense-only by 580% on Recall@10" is a retrievable, linkable unit. "Retrieval" is not. Atomic claim = the Zettelkasten note = the RAG chunk that actually works.</p>
+      </div>
+
+    </div>
+
+    <h3 style="font-size:14px;font-weight:700;color:var(--text-primary);margin:28px 0 12px;">Personal Scale Changes Every Technical Decision</h3>
+    <table class="ctable">
+      <thead>
+        <tr><th>Dimension</th><th>Enterprise RAG</th><th>Personal PKB</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Corpus size</td><td style="font-size:12px;color:var(--text-secondary)">100K–10M chunks</td><td style="font-size:12px;color:#3fb950">1K–100K notes</td></tr>
+        <tr><td>Vector DB</td><td style="font-size:12px;color:var(--text-secondary)">Qdrant / Weaviate</td><td style="font-size:12px;color:#3fb950">SQLite-vec or ChromaDB (local)</td></tr>
+        <tr><td>Embedding model</td><td style="font-size:12px;color:var(--text-secondary)">BGE-M3 (568M params)</td><td style="font-size:12px;color:#3fb950">nomic-embed-text (384d) — 4× smaller</td></tr>
+        <tr><td>Retrieval latency</td><td style="font-size:12px;color:var(--text-secondary)">&lt;100ms (required)</td><td style="font-size:12px;color:#3fb950">&lt;30ms (trivial at this scale)</td></tr>
+        <tr><td>What's hard</td><td style="font-size:12px;color:var(--text-secondary)">Scale, cost, latency</td><td style="font-size:12px;color:#3fb950">Capture discipline, linking habit</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="pdivider">
+
+  <!-- Architecture -->
+  <section class="psection" id="architecture">
+    <h2>How a Personal Context Engine Works</h2>
+    <p class="sub">The architecture has five layers. The distinguishing one — what separates it from a document Q&A system — is the personal ontology and the context assembly layer.</p>
+
+    <div class="arch-diagram">
+      <div class="arch-layer" style="border-left-color:#f0883e;">
+        <h4>1. Ingestion</h4>
+        Notes · Decisions · Conversations · Voice memos → transcribed → stored with timestamp, source, project tag. The capture must be frictionless — if it's work, it won't happen.
+      </div>
+      <div class="arch-layer" style="border-left-color:#e3b341;">
+        <h4>2. Indexing — Atomic Claims + Personal Ontology</h4>
+        Each ingested item → extract atomic claims → extract entities (people, projects, instruments) → build relationships (Ahmad WORKS_ON Tanjung, AT-201 LOCATED_IN Unit 3) → temporal markers (when this was known). The personal ontology is the model of your world.
+      </div>
+      <div class="arch-layer" style="border-left-color:#3fb950;">
+        <h4>3. Memory Stores</h4>
+        Working memory (current conversation) · Episodic (past conversations, Zep+Graphiti) · Semantic (personal ontology, vector+graph) · Procedural (how you work, learned from patterns).
+      </div>
+      <div class="arch-layer highlight">
+        <h4>4. Context Assembly — The Core Differentiator</h4>
+        For a query: expand query with personal ontology → retrieve from all stores → assemble context window: [identity block ~200 tokens] + [retrieved knowledge ~2,000 tokens] + [episodic context ~500 tokens] + [temporal state ~200 tokens] + [query ~100 tokens]. The assembly budget forces intelligent ranking.
+      </div>
+      <div class="arch-layer" style="border-left-color:#58a6ff;">
+        <h4>5. Generation — Grounded and Cited</h4>
+        LLM generates response grounded in assembled personal context. Every answer cites the specific note/decision/document it drew from. Hallucination is flagged when the system lacks relevant personal knowledge.
+      </div>
+    </div>
+  </section>
+
+  <hr class="pdivider">
+
+  <!-- 10x moments -->
+  <section class="psection" id="10x">
+    <h2>The 10× Moments</h2>
+    <p class="sub">When does a personal context engine feel obviously superior to a common LLM? These are the moments when the difference becomes visceral, not theoretical.</p>
+
+    <div class="moment-grid">
+
+      <div class="moment-card">
+        <div class="number">01</div>
+        <h4>Why did we decide this?</h4>
+        <div class="scenario">
+          <div class="q">You: "Why are we using ChromaDB instead of Qdrant?"</div>
+          <div style="margin:6px 0 2px;"><span class="lbl llm">Common LLM:</span></div>
+          <div class="llm">Generic comparison of ChromaDB vs Qdrant features...</div>
+          <div style="margin:6px 0 2px;"><span class="lbl pce">Personal context engine:</span></div>
+          <div class="pce">"You chose ChromaDB in Nov 2025 — simplest option for Phase 1. You noted you'd likely migrate to Qdrant when you need filtered metadata search."</div>
+        </div>
+      </div>
+
+      <div class="moment-card">
+        <div class="number">02</div>
+        <h4>What did I miss while away?</h4>
+        <div class="scenario">
+          <div class="q">You: "I haven't touched the reranking module in 2 months. Catch me up."</div>
+          <div style="margin:6px 0 2px;"><span class="lbl llm">Common LLM:</span></div>
+          <div class="llm">Here's a general overview of reranking methods...</div>
+          <div style="margin:6px 0 2px;"><span class="lbl pce">Personal context engine:</span></div>
+          <div class="pce">"Since March: you added D14 (BGE-v2-M3 for multilingual), flagged an audit issue with AT-201 under semantic reranking, and have Q-open on exact match layer integration."</div>
+        </div>
+      </div>
+
+      <div class="moment-card">
+        <div class="number">03</div>
+        <h4>Write this in my voice</h4>
+        <div class="scenario">
+          <div class="q">You: "Draft a WhatsApp message to Ahmad about the AT-201 delay."</div>
+          <div style="margin:6px 0 2px;"><span class="lbl llm">Common LLM:</span></div>
+          <div class="llm">"Dear Ahmad, I hope this message finds you well. I wanted to reach out regarding..."</div>
+          <div style="margin:6px 0 2px;"><span class="lbl pce">Personal context engine:</span></div>
+          <div class="pce">"Ahmad, AT-201 calibration delayed 3 days — waiting on vendor response. Will update once confirmed. Should still hit April 20 milestone."</div>
+        </div>
+      </div>
+
+      <div class="moment-card">
+        <div class="number">04</div>
+        <h4>Connect things across months</h4>
+        <div class="scenario">
+          <div class="q">You: "Why does the FTS5 hybrid index matter for us specifically?"</div>
+          <div style="margin:6px 0 2px;"><span class="lbl llm">Common LLM:</span></div>
+          <div class="llm">FTS5 provides full-text search with BM25 ranking...</div>
+          <div style="margin:6px 0 2px;"><span class="lbl pce">Personal context engine:</span></div>
+          <div class="pce">"The GA02 audit finding (Dec 2025) showed your dense embeddings couldn't distinguish AT-201 from AT-202. FTS5 was the fix — it's in your D-hybrid decision."</div>
+        </div>
+      </div>
+
+      <div class="moment-card">
+        <div class="number">05</div>
+        <h4>Where to focus next</h4>
+        <div class="scenario">
+          <div class="q">You: "I'm starting Phase 1 implementation today. Where do I begin?"</div>
+          <div style="margin:6px 0 2px;"><span class="lbl llm">Common LLM:</span></div>
+          <div class="llm">To start a software implementation, first define your requirements...</div>
+          <div style="margin:6px 0 2px;"><span class="lbl pce">Personal context engine:</span></div>
+          <div class="pce">"3 critical bugs (C02: missing module specs) block Phase 1. 2 open questions (Q4, Q5) unresolved. Audit says: fix C01–C05 before writing code."</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="pdivider">
+
+  <!-- NEXUS roadmap toward personal AI -->
+  <section class="psection" id="nexus-roadmap">
+    <h2>NEXUS: The Road to Personal Context Engine</h2>
+    <p class="sub">NEXUS currently builds a project-scoped context engine for EPC teams. The personal context engine is the destination — a Chief of Staff AI for a PM. Here's the progression:</p>
+
+    <div class="phase-progression">
+      <div class="prog-phase current">
+        <div class="phase-num">Phase 1–2 · Current</div>
+        <h4>Project Context Engine</h4>
+        <p>Knows: documents, specs, SOPs for one project. Can answer: "what does the AT-201 data sheet say?"</p>
+      </div>
+      <div class="prog-phase">
+        <div class="phase-num">Phase 3</div>
+        <h4>Team Context Engine</h4>
+        <p>Knows: cross-project patterns, team decisions, role-specific context. Can answer: "how did we handle a similar issue last project?"</p>
+      </div>
+      <div class="prog-phase">
+        <div class="phase-num">Phase 4</div>
+        <h4>Personal Layer</h4>
+        <p>Knows: PM's decision history, preferences, communication style. Can answer: "given how you work, here's what I recommend."</p>
+      </div>
+      <div class="prog-phase">
+        <div class="phase-num">Future</div>
+        <h4>Chief of Staff AI</h4>
+        <p>Knows: everything + active work state. Proactively: "you have 3 unresolved questions from last week that are now blocking Phase 2."</p>
+      </div>
+    </div>
+
+    <div class="tldr" style="margin-top:24px;">
+      <strong>Karpathy's framing predicts this roadmap</strong>
+      The LLM OS model says the context window is RAM — and the filesystem (personal KB) is what makes it intelligent. NEXUS Phase 1 builds the filesystem for a project. The personal context engine phase builds the filesystem for a person. The LLM stays the same; what changes is the richness and continuity of what's in RAM.
+    </div>
+  </section>
+
+  <hr class="pdivider">
+
+  <!-- Footer -->
+  <div style="padding:20px 0 48px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+    <a href="index.html" style="color:var(--text-secondary);font-size:13px;text-decoration:none;">← NEXUS Overview</a>
+    <a href="research.html" style="color:var(--accent);font-size:13px;text-decoration:none;">Research Overview</a>
+    <a href="graph.html" style="color:var(--accent);font-size:13px;text-decoration:none;">3D Knowledge Graph</a>
+    <a href="docs/research/personal-context-engine.md" style="color:var(--accent);font-size:13px;text-decoration:none;">personal-context-engine.md</a>
+    <a href="docs/research/karpathy-llm-os.md" style="color:var(--accent);font-size:13px;text-decoration:none;">karpathy-llm-os.md</a>
+    <span style="color:var(--text-muted);font-size:12px;">Updated: 2026-05-30</span>
+  </div>
+
+</main>
+</body>
+</html>

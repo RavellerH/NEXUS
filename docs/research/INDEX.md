@@ -3,7 +3,7 @@ id: research-index
 type: navigation
 status: active
 last_updated: 2026-05-30
-tags: [context-engine, rag, research, index]
+tags: [context-engine, rag, research, index, personal-ai, karpathy]
 related:
   - ./overview.md
   - ./retrieval.md
@@ -16,6 +16,9 @@ related:
   - ./frameworks.md
   - ./combinations.md
   - ./evaluation.md
+  - ./personal-knowledge-base.md
+  - ./karpathy-llm-os.md
+  - ./personal-context-engine.md
   - ../INDEX.md
 ---
 
@@ -61,6 +64,20 @@ graph TD
     MEM --> COMB
 
     COMB --> EVAL[Evaluation]
+
+    IDX --> PKB[Personal Knowledge Base]
+    IDX --> KARP[Karpathy: LLM OS]
+    IDX --> PCE[Personal Context Engine]
+
+    PKB --> MEM
+    PKB --> GR
+    PKB --> RET
+    KARP --> MEM
+    KARP --> FW
+    KARP --> PCE
+    PCE --> PKB
+    PCE --> MEM
+    PCE --> COMB
 ```
 
 ---
@@ -80,6 +97,9 @@ graph TD
 | [[frameworks]] | LlamaIndex, LangChain, LangGraph, Haystack, DSPy | High |
 | [[combinations]] | Best stack by use case (enterprise, legal, code, EPC…) | High |
 | [[evaluation]] | RAGAS, ARES, TruLens, DeepEval, what matters in prod | High |
+| [[personal-knowledge-base]] | PKB design, Zettelkasten, PARA, personal-scale tech stack | High |
+| [[karpathy-llm-os]] | LLM OS mental model, Software 2.0, Chief of Staff AI | High |
+| [[personal-context-engine]] | Personal context engine vs common LLM, architecture, 10× moments | High |
 
 ---
 
