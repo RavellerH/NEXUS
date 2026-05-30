@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Context Engine Research 2025–2026</title>
+  <meta name="description" content="State-of-the-art context engine systems: retrieval methods, embedding models, vector databases, frameworks, and system combinations by use case.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    /* Research page uses sidebar layout */
+    .research-hero {
+      padding: 40px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .research-hero h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 8px;
+    }
+    .research-hero p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      max-width: 640px;
+      line-height: 1.6;
+      margin: 0 0 16px;
+    }
+    .research-hero .hero-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    /* Research sections */
+    .research-section {
+      margin-bottom: 56px;
+    }
+    .research-section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 4px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .research-section .section-sub {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin: 6px 0 20px;
+    }
+    /* TL;DR callout */
+    .tldr {
+      background: #0c1f3a;
+      border: 1px solid #1f6feb;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .tldr strong {
+      color: #58a6ff;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 4px;
+    }
+    /* Benchmark bar charts */
+    .bench-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .bench-table th {
+      text-align: left;
+      padding: 8px 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    .bench-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .bench-table tr:last-child td {
+      border-bottom: none;
+    }
+    .bench-table tr:hover td {
+      background: var(--surface-hover);
+    }
+    .bench-table .hl {
+      background: #0c1f3a;
+    }
+    .bench-table .hl td {
+      color: var(--text-primary);
+    }
+    .bar-cell {
+      min-width: 200px;
+    }
+    .bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bar {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      flex: 1;
+      max-width: 160px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bar-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      border-radius: 4px;
+      background: #238636;
+    }
+    .bar-fill.blue { background: #1f6feb; }
+    .bar-fill.orange { background: #e3b341; }
+    .bar-fill.purple { background: #8957e5; }
+    .bar-fill.teal { background: #2ea043; }
+    .bar-val {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      min-width: 44px;
+    }
+    /* Winner badge */
+    .winner-badge {
+      display: inline-block;
+      background: #1a3a2a;
+      border: 1px solid #238636;
+      color: #3fb950;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    /* Use-case combination cards */
+    .combo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .combo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .combo-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 6px;
+    }
+    .combo-card .combo-problem {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 0 0 14px;
+      line-height: 1.5;
+    }
+    .combo-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .combo-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12px;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .combo-row:last-child {
+      border-bottom: none;
+    }
+    .combo-row .layer {
+      color: var(--text-secondary);
+      min-width: 90px;
+    }
+    .combo-row .pick {
+      color: var(--text-primary);
+      font-weight: 500;
+      text-align: right;
+    }
+    .combo-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--surface-hover);
+      border-radius: 4px;
+      padding: 7px 10px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    /* Maturity matrix */
+    .maturity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .maturity-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .maturity-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 4px;
+    }
+    .maturity-card .maturity-level {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .maturity-card .maturity-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .level-stable { color: #3fb950; }
+    .level-growing { color: #58a6ff; }
+    .level-emerging { color: #e3b341; }
+    .level-research { color: #bc8cff; }
+    /* Topic nav pills */
+    .topic-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .topic-pill {
+      display: inline-block;
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .topic-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(31, 111, 235, 0.08);
+    }
+    /* Key numbers */
+    .numbers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .number-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .number-card .big-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #58a6ff;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .number-card .num-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .number-card .num-source {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    /* Decision tree simplified */
+    .decision-tree {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .decision-tree .q { color: var(--text-primary); font-weight: 600; }
+    .decision-tree .a { color: #3fb950; }
+    /* Source tag */
+    .source-tag {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--text-muted);
+      background: var(--surface-hover);
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    /* Divider */
+    hr.rdivider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+    /* Inline code */
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #e3b341;
+    }
+    /* Responsive */
+    @media (max-width: 640px) {
+      .combo-grid { grid-template-columns: 1fr; }
+      .maturity-grid { grid-template-columns: 1fr; }
+      .numbers-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>NEXUS</h1>
+    <p>AI Context Engine for EPC</p>
+    <span class="sidebar-badge">Research</span>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="index.html"><span class="icon">◀</span> Back to NEXUS</a>
+    <div class="nav-section">Research Topics</div>
+    <a href="#overview" class="active"><span class="icon">◉</span> Landscape Overview</a>
+    <a href="#key-numbers"><span class="icon">◎</span> Key Numbers</a>
+    <a href="#retrieval"><span class="icon">◎</span> Retrieval Methods</a>
+    <a href="#embeddings"><span class="icon">◎</span> Embedding Models</a>
+    <a href="#vector-dbs"><span class="icon">◎</span> Vector Databases</a>
+    <a href="#reranking"><span class="icon">◎</span> Reranking</a>
+    <a href="#graph-rag"><span class="icon">◎</span> Graph RAG</a>
+    <a href="#memory"><span class="icon">◎</span> Memory Systems</a>
+    <a href="#frameworks"><span class="icon">◎</span> Frameworks</a>
+    <a href="#combinations"><span class="icon">◎</span> Stacks by Use Case</a>
+    <a href="#maturity"><span class="icon">◎</span> Maturity Matrix</a>
+    <div class="nav-section">Source Files</div>
+    <a href="docs/research/INDEX.md"><span class="icon">◎</span> Research Index</a>
+    <a href="docs/research/overview.md"><span class="icon">◎</span> Overview.md</a>
+    <a href="docs/research/retrieval.md"><span class="icon">◎</span> Retrieval.md</a>
+    <a href="docs/research/indexing.md"><span class="icon">◎</span> Indexing.md</a>
+    <a href="docs/research/reranking.md"><span class="icon">◎</span> Reranking.md</a>
+    <a href="docs/research/graph-rag.md"><span class="icon">◎</span> Graph RAG.md</a>
+    <a href="docs/research/memory.md"><span class="icon">◎</span> Memory.md</a>
+    <a href="docs/research/embeddings.md"><span class="icon">◎</span> Embeddings.md</a>
+    <a href="docs/research/vector-databases.md"><span class="icon">◎</span> Vector DBs.md</a>
+    <a href="docs/research/frameworks.md"><span class="icon">◎</span> Frameworks.md</a>
+    <a href="docs/research/combinations.md"><span class="icon">◎</span> Combinations.md</a>
+    <a href="docs/research/evaluation.md"><span class="icon">◎</span> Evaluation.md</a>
+  </nav>
+  <div class="sidebar-footer">Updated: 2026-05-30</div>
+</aside>
+
+<main class="main-content">
+
+  <div class="research-hero" id="overview">
+    <h1>Context Engine Landscape 2025–2026</h1>
+    <p>
+      A systematic survey of retrieval methods, embedding models, vector databases, memory systems,
+      orchestration frameworks, and best-in-class system combinations — based on benchmarks,
+      production evidence, and architecture tradeoffs as of 2026.
+    </p>
+    <div class="hero-meta">
+      <span class="badge badge-blue">12 research files</span>
+      <span class="badge badge-gray">General purpose · not EPC-specific</span>
+      <span class="badge badge-green">Updated 2026-05-30</span>
+    </div>
+  </div>
+
+  <!-- Topic nav -->
+  <nav class="topic-nav">
+    <a href="#key-numbers" class="topic-pill">Key Numbers</a>
+    <a href="#retrieval" class="topic-pill">Retrieval</a>
+    <a href="#embeddings" class="topic-pill">Embeddings</a>
+    <a href="#vector-dbs" class="topic-pill">Vector DBs</a>
+    <a href="#reranking" class="topic-pill">Reranking</a>
+    <a href="#graph-rag" class="topic-pill">Graph RAG</a>
+    <a href="#memory" class="topic-pill">Memory</a>
+    <a href="#frameworks" class="topic-pill">Frameworks</a>
+    <a href="#combinations" class="topic-pill">Stacks by Use Case</a>
+    <a href="#maturity" class="topic-pill">Maturity Matrix</a>
+  </nav>
+
+  <!-- ── KEY NUMBERS ──────────────────────────────────── -->
+  <section class="research-section" id="key-numbers">
+    <h2>Key Numbers to Know</h2>
+    <p class="section-sub">The benchmarks that drive architectural decisions.</p>
+
+    <div class="numbers-grid">
+      <div class="number-card">
+        <div class="big-num">+580%</div>
+        <div class="num-label">Recall@10 gain from hybrid RRF over best single-method retrieval</div>
+        <div class="num-source">MS MARCO benchmark</div>
+      </div>
+      <div class="number-card">
+        <div class="big-num">67%</div>
+        <div class="num-label">Retrieval failure rate reduction with Contextual Retrieval + reranking</div>
+        <div class="num-source">Anthropic 2024</div>
+      </div>
+      <div class="number-card">
+        <div class="big-num">+70%</div>
+        <div class="num-label">Comprehensiveness gain from Graph RAG over naive RAG</div>
+        <div class="num-source">Microsoft GraphRAG paper</div>
+      </div>
+      <div class="number-card">
+        <div class="big-num">74.3</div>
+        <div class="num-label">Best open-weight MTEB v2 score (Microsoft Harrier-OSS-v1, 27B)</div>
+        <div class="num-source">MTEB v2 2026</div>
+      </div>
+      <div class="number-card">
+        <div class="big-num">3.5ms</div>
+        <div class="num-label">Lowest framework overhead (DSPy), vs 14ms for LangGraph</div>
+        <div class="num-source">2025 agentic RAG benchmark</div>
+      </div>
+      <div class="number-card">
+        <div class="big-num">45×</div>
+        <div class="num-label">ColBERT/PLAID CPU speedup over GPU cross-encoder at same recall</div>
+        <div class="num-source">PLAID paper</div>
+      </div>
+      <div class="number-card">
+        <div class="big-num">$33K</div>
+        <div class="num-label">Microsoft GraphRAG indexing cost for 5GB legal corpus (GPT-4)</div>
+        <div class="num-source">GraphRAG paper</div>
+      </div>
+      <div class="number-card">
+        <div class="big-num">0.8</div>
+        <div class="num-label">LLM-judge Spearman correlation with human raters (GPT-4 class)</div>
+        <div class="num-source">RAGAS evaluation research</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── RETRIEVAL ────────────────────────────────────── -->
+  <section class="research-section" id="retrieval">
+    <h2>Retrieval Methods</h2>
+    <p class="section-sub">How the system finds the right chunks. The most impactful layer to get right first.</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      Use hybrid retrieval (BM25 + dense + RRF) as the default. Add ColBERT late-interaction only if you have a latency budget and high-recall requirements. Never use dense-only in production corpora with exact identifiers (codes, IDs, names).
+    </div>
+
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>MS MARCO Recall@10</th>
+          <th></th>
+          <th>Best for</th>
+          <th>Weakness</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>BM25 (sparse)</td>
+          <td>11.9%</td>
+          <td class="bar-cell">
+            <div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:15%"></div></div><span class="bar-val">11.9%</span></div>
+          </td>
+          <td style="color:var(--text-secondary);font-size:12px">Keyword, product codes, IDs</td>
+          <td style="color:var(--text-secondary);font-size:12px">No semantic understanding</td>
+        </tr>
+        <tr>
+          <td>Dense (bi-encoder)</td>
+          <td>13.9%</td>
+          <td class="bar-cell">
+            <div class="bar-wrap"><div class="bar"><div class="bar-fill blue" style="width:17%"></div></div><span class="bar-val">13.9%</span></div>
+          </td>
+          <td style="color:var(--text-secondary);font-size:12px">Semantic, concept queries</td>
+          <td style="color:var(--text-secondary);font-size:12px">Misses exact identifiers</td>
+        </tr>
+        <tr class="hl">
+          <td><strong>Hybrid RRF</strong> <span class="winner-badge">Best</span></td>
+          <td><strong>80.8%</strong></td>
+          <td class="bar-cell">
+            <div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">80.8%</span></div>
+          </td>
+          <td style="color:var(--text-secondary);font-size:12px">General production RAG</td>
+          <td style="color:var(--text-secondary);font-size:12px">Slightly more infra</td>
+        </tr>
+        <tr>
+          <td>ColBERT / PLAID</td>
+          <td>Highest recall</td>
+          <td class="bar-cell">
+            <div class="bar-wrap"><div class="bar"><div class="bar-fill purple" style="width:95%"></div></div><span class="bar-val">Highest</span></div>
+          </td>
+          <td style="color:var(--text-secondary);font-size:12px">High-stakes, legal, medical</td>
+          <td style="color:var(--text-secondary);font-size:12px">Storage cost: 32× more</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="decision-tree" style="margin-top: 16px;">
+<span class="q">Does your corpus contain exact identifiers (codes, IDs, part numbers)?</span>
+├── YES → <span class="a">Hybrid BM25 + Dense + RRF</span> (mandatory — dense alone will miss AT-201 vs AT-202)
+└── NO
+    ├── <span class="q">Do you have a strict latency budget (&lt;100ms p95)?</span>
+    │   ├── YES → <span class="a">Dense only (bi-encoder ANN)</span>
+    │   └── NO → <span class="a">Hybrid RRF</span> (safe default)
+    └── <span class="q">Need maximum recall (legal/medical)?</span>
+        └── YES → <span class="a">ColBERT / PLAID late interaction</span>
+    </div>
+
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/retrieval.md" style="color:var(--accent)">retrieval.md</a> · <a href="docs/research/indexing.md" style="color:var(--accent)">indexing.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── EMBEDDINGS ───────────────────────────────────── -->
+  <section class="research-section" id="embeddings">
+    <h2>Embedding Models</h2>
+    <p class="section-sub">What converts text to vectors. Model choice is the second most impactful decision after retrieval strategy.</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      Commercial: Voyage voyage-3-large (best retrieval quality), Cohere embed-v4 (multimodal + multilingual). Self-hosted: BGE-M3 (tri-mode, 100+ languages), Qwen3-Embedding-8B (best multilingual 2025). Always run in-domain evaluation before committing.
+    </div>
+
+    <h3 style="font-size:13px;color:var(--text-secondary);margin:0 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Commercial Models — MTEB v1 Average</h3>
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>MTEB Avg</th>
+          <th></th>
+          <th>Dims</th>
+          <th>Key Strength</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>OpenAI text-embedding-3-large</td>
+          <td>64.6</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill blue" style="width:82%"></div></div><span class="bar-val">64.6</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">3072</td>
+          <td style="color:var(--text-secondary);font-size:12px">General purpose, widely integrated</td>
+        </tr>
+        <tr>
+          <td>Cohere embed-v4</td>
+          <td>65.2</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill blue" style="width:84%"></div></div><span class="bar-val">65.2</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">1024</td>
+          <td style="color:var(--text-secondary);font-size:12px">Multimodal (image+text), multilingual</td>
+        </tr>
+        <tr class="hl">
+          <td><strong>Voyage voyage-3-large</strong> <span class="winner-badge">Best commercial retrieval</span></td>
+          <td>~65–66</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:86%"></div></div><span class="bar-val">~66</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">1024</td>
+          <td style="color:var(--text-secondary);font-size:12px">Best-in-class retrieval, BEIR leader</td>
+        </tr>
+        <tr>
+          <td>Voyage code-3</td>
+          <td>—</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill purple" style="width:70%"></div></div><span class="bar-val">Code</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">1536</td>
+          <td style="color:var(--text-secondary);font-size:12px">+4–8 Recall@10 on code corpora</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:13px;color:var(--text-secondary);margin:16px 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Open-Weight Models</h3>
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>MTEB</th>
+          <th></th>
+          <th>Params</th>
+          <th>Key Strength</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td><strong>BGE-M3</strong> <span class="winner-badge">Best self-hosted</span></td>
+          <td>63.0</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:80%"></div></div><span class="bar-val">63.0</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">568M</td>
+          <td style="color:var(--text-secondary);font-size:12px">Tri-mode (dense+sparse+ColBERT), 100+ langs</td>
+        </tr>
+        <tr>
+          <td>Qwen3-Embedding-8B</td>
+          <td>70.58 (ML)</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill blue" style="width:90%"></div></div><span class="bar-val">70.6</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">8B</td>
+          <td style="color:var(--text-secondary);font-size:12px">2025 multilingual MTEB leader (CJK + SEA)</td>
+        </tr>
+        <tr>
+          <td>NV-Embed-v2</td>
+          <td>72.31</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill purple" style="width:92%"></div></div><span class="bar-val">72.3</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">~7B</td>
+          <td style="color:var(--text-secondary);font-size:12px">Highest open MTEB v1 score</td>
+        </tr>
+        <tr class="hl">
+          <td><strong>Microsoft Harrier-OSS-v1</strong> <span class="winner-badge">MTEB v2 leader</span></td>
+          <td>74.3 (v2)</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:95%"></div></div><span class="bar-val">74.3</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">27B</td>
+          <td style="color:var(--text-secondary);font-size:12px">2026 MTEB v2 open-weight leader</td>
+        </tr>
+        <tr>
+          <td>multilingual-e5-large</td>
+          <td>~62</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill orange" style="width:78%"></div></div><span class="bar-val">~62</span></div></td>
+          <td style="color:var(--text-secondary);font-size:12px">560M</td>
+          <td style="color:var(--text-secondary);font-size:12px">Reliable multilingual baseline, 100+ langs</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/embeddings.md" style="color:var(--accent)">embeddings.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── VECTOR DATABASES ─────────────────────────────── -->
+  <section class="research-section" id="vector-dbs">
+    <h2>Vector Databases</h2>
+    <p class="section-sub">Where the embeddings live. The choice matters most for scale, filtering, and ops complexity.</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      Qdrant for self-hosted production. Pinecone for fastest managed time-to-market. Weaviate for native hybrid search managed. pgvector if you already run Postgres and have &lt;50M vectors. ChromaDB only for local dev.
+    </div>
+
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Database</th>
+          <th>Best at</th>
+          <th>Self-hosted</th>
+          <th>Hybrid search</th>
+          <th>Scale ceiling</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td><strong>Qdrant</strong> <span class="winner-badge">Self-hosted pick</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Filtered search, Rust perf</td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td><span class="badge badge-green">Native</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">&lt;500M</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Best-in-class metadata filters</td>
+        </tr>
+        <tr>
+          <td>Pinecone</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Managed ops simplicity</td>
+          <td><span class="badge badge-red">No</span></td>
+          <td><span class="badge badge-yellow">Via metadata</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">High (serverless)</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Proprietary — migration costly</td>
+        </tr>
+        <tr>
+          <td>Weaviate</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Built-in BM25+dense hybrid</td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td><span class="badge badge-green">Native</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">&lt;500M</td>
+          <td style="font-size:12px;color:var(--text-secondary)">GraphQL API, multi-tenancy</td>
+        </tr>
+        <tr>
+          <td>Milvus / Zilliz</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Billion-scale distributed</td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">&gt;500M</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Higher ops complexity</td>
+        </tr>
+        <tr>
+          <td>pgvector</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Postgres-native simplicity</td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td><span class="badge badge-yellow">pg_trgm</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">&lt;50M</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Full SQL; 28× boost with pgvectorscale</td>
+        </tr>
+        <tr>
+          <td>ChromaDB</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Local dev prototyping</td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td><span class="badge badge-red">No</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">&lt;1M</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Not production-grade</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/vector-databases.md" style="color:var(--accent)">vector-databases.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── RERANKING ─────────────────────────────────────── -->
+  <section class="research-section" id="reranking">
+    <h2>Reranking</h2>
+    <p class="section-sub">The fastest quality multiplier. Retrieve wide (top 20–50), rerank to tight (top 3–5).</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      Zerank 2 leads the MTEB Reranking leaderboard (1638 ELO). MixedBread mxbai-rerank-large-v2 is the best open-source default (57.49 BEIR NDCG@10). BGE Reranker v2-M3 for multilingual self-hosted. Combined with Contextual Retrieval, reranking gives a 67% failure rate reduction.
+    </div>
+
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>MTEB ELO / BEIR NDCG@10</th>
+          <th></th>
+          <th>Type</th>
+          <th>Best for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td><strong>Zerank 2</strong> <span class="winner-badge">ELO leader</span></td>
+          <td>1638 ELO</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">1638</span></div></td>
+          <td><span class="badge badge-blue">Commercial</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">General, managed API</td>
+        </tr>
+        <tr>
+          <td>Cohere Rerank v4.0 Pro</td>
+          <td>1629 ELO</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill blue" style="width:97%"></div></div><span class="bar-val">1629</span></div></td>
+          <td><span class="badge badge-blue">Commercial</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Production API, multilingual</td>
+        </tr>
+        <tr class="hl">
+          <td><strong>MixedBread mxbai-rerank-large-v2</strong> <span class="winner-badge">Best open</span></td>
+          <td>57.49 NDCG@10</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:92%"></div></div><span class="bar-val">57.49</span></div></td>
+          <td><span class="badge badge-green">Open source</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Self-hosted default</td>
+        </tr>
+        <tr>
+          <td>BGE Reranker v2-M3</td>
+          <td>56.04 NDCG@10</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill orange" style="width:88%"></div></div><span class="bar-val">56.04</span></div></td>
+          <td><span class="badge badge-green">Open source</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Multilingual self-hosted</td>
+        </tr>
+        <tr>
+          <td>RankGPT (GPT-4o)</td>
+          <td>High</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill purple" style="width:85%"></div></div><span class="bar-val">High</span></div></td>
+          <td><span class="badge badge-yellow">LLM-as-judge</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Small corpora, quality-first</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:16px;font-size:13px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">Recommended configuration</strong>: Retrieve k=20–50 candidates → cross-encoder rerank → return top n=3–5. This pattern costs 15–50ms extra but eliminates most rank inversions from bi-encoder retrieval.
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/reranking.md" style="color:var(--accent)">reranking.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── GRAPH RAG ──────────────────────────────────────── -->
+  <section class="research-section" id="graph-rag">
+    <h2>Graph RAG</h2>
+    <p class="section-sub">When entities, relationships, and multi-hop reasoning matter more than chunk similarity.</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      Microsoft GraphRAG: +50–70% comprehensiveness on global/thematic queries — but $33K indexing cost for 5GB with GPT-4. LightRAG is 100× cheaper and nearly as good for most use cases. Use graph when your queries span entities across many documents.
+    </div>
+
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>System</th>
+          <th>Query types it wins</th>
+          <th>Indexing cost</th>
+          <th>Self-hostable</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Microsoft GraphRAG</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Global/thematic, cross-document synthesis</td>
+          <td style="color:#e3b341;font-size:12px">$$$$ (GPT-4 extraction)</td>
+          <td><span class="badge badge-green">Yes</span></td>
+        </tr>
+        <tr class="hl">
+          <td><strong>LightRAG</strong> <span class="winner-badge">Best value</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Global + local; dual-level search</td>
+          <td style="color:#3fb950;font-size:12px">100× cheaper than GraphRAG</td>
+          <td><span class="badge badge-green">Yes</span></td>
+        </tr>
+        <tr>
+          <td>LlamaIndex Property Graph</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Structured entity retrieval, traversal</td>
+          <td style="color:#58a6ff;font-size:12px">Medium</td>
+          <td><span class="badge badge-green">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Graphiti (temporal)</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Agent memory, time-aware queries</td>
+          <td style="color:#58a6ff;font-size:12px">Medium</td>
+          <td><span class="badge badge-green">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Vector RAG (baseline)</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Local factual lookups, single-hop</td>
+          <td style="color:#3fb950;font-size:12px">Cheap</td>
+          <td><span class="badge badge-green">Yes</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:16px;font-size:13px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">When to use Graph RAG:</strong> Cross-document entity questions ("which suppliers are connected to this PO?"), hierarchical navigation (plant → unit → equipment), global queries requiring synthesis across hundreds of documents, agent memory with time-ordered episode recall.
+      <br><br>
+      <strong style="color:var(--text-primary);">When NOT to:</strong> Simple single-document factual lookup, latency-sensitive paths, when corpus is &lt;1,000 documents.
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/graph-rag.md" style="color:var(--accent)">graph-rag.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── MEMORY ─────────────────────────────────────────── -->
+  <section class="research-section" id="memory">
+    <h2>Memory Systems</h2>
+    <p class="section-sub">How agents and assistants remember across sessions, users, and time.</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      The 2026 dominant pattern is hybrid vector + graph + short-term buffer. Mem0 for general agent memory. Zep+Graphiti for time-aware enterprise agents. MemGPT/Letta for self-managed tiered context.
+    </div>
+
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Memory Type</th>
+          <th>What it stores</th>
+          <th>Best implementation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Working memory</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Current context window, active task state</td>
+          <td style="font-size:12px;color:var(--text-secondary)">In-context (LLM native)</td>
+        </tr>
+        <tr>
+          <td><strong>Episodic memory</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Past conversations, session history</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Zep + Graphiti (temporal graph)</td>
+        </tr>
+        <tr>
+          <td><strong>Semantic memory</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Facts, entities, user preferences</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Mem0 (vector + graph + KV)</td>
+        </tr>
+        <tr>
+          <td><strong>Procedural memory</strong></td>
+          <td style="font-size:12px;color:var(--text-secondary)">How to perform tasks, tool patterns</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Fine-tuning / system prompt</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="bench-table" style="margin-top: 12px;">
+      <thead>
+        <tr>
+          <th>System</th>
+          <th>Architecture</th>
+          <th>Best for</th>
+          <th>Production maturity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mem0</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Vector + graph + KV triple store</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Per-user personalization, general agents</td>
+          <td><span class="badge badge-green">High</span></td>
+        </tr>
+        <tr class="hl">
+          <td><strong>Zep + Graphiti</strong> <span class="winner-badge">Enterprise pick</span></td>
+          <td style="font-size:12px;color:var(--text-secondary)">Temporal knowledge graph</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Time-aware enterprise agents, CRM</td>
+          <td><span class="badge badge-green">High</span></td>
+        </tr>
+        <tr>
+          <td>MemGPT / Letta</td>
+          <td style="font-size:12px;color:var(--text-secondary)">OS-style tiered memory (in/out context)</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Long-horizon agents, research</td>
+          <td><span class="badge badge-yellow">Medium</span></td>
+        </tr>
+        <tr>
+          <td>LangMem</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Profile + episodic + semantic</td>
+          <td style="font-size:12px;color:var(--text-secondary)">LangGraph agents, fast integration</td>
+          <td><span class="badge badge-blue">Growing</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/memory.md" style="color:var(--accent)">memory.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── FRAMEWORKS ─────────────────────────────────────── -->
+  <section class="research-section" id="frameworks">
+    <h2>Orchestration Frameworks</h2>
+    <p class="section-sub">The glue layer. Answer correctness is nearly identical across frameworks — differentiation is overhead, token cost, and tooling.</p>
+
+    <div class="tldr">
+      <strong>TL;DR</strong>
+      LlamaIndex for retrieval-heavy pipelines. LangGraph for stateful agents. Haystack for regulated/auditable environments. DSPy for prompt optimization research. Custom for maximum performance control.
+    </div>
+
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Framework</th>
+          <th>Overhead latency</th>
+          <th></th>
+          <th>Tokens/query</th>
+          <th>Best for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td><strong>DSPy</strong> <span class="winner-badge">Fastest</span></td>
+          <td>~3.5 ms</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:25%"></div></div><span class="bar-val">3.5ms</span></div></td>
+          <td style="font-size:12px;color:var(--text-secondary)">~2.0k</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Research, prompt optimization</td>
+        </tr>
+        <tr>
+          <td>Haystack</td>
+          <td>~5.9 ms</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill blue" style="width:42%"></div></div><span class="bar-val">5.9ms</span></div></td>
+          <td style="font-size:12px;color:var(--text-secondary)">~1.57k</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Regulated envs, YAML pipelines</td>
+        </tr>
+        <tr>
+          <td>LlamaIndex</td>
+          <td>~6.0 ms</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill blue" style="width:43%"></div></div><span class="bar-val">6.0ms</span></div></td>
+          <td style="font-size:12px;color:var(--text-secondary)">~1.60k</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Document ingestion + retrieval</td>
+        </tr>
+        <tr>
+          <td>LangChain / LCEL</td>
+          <td>~10 ms</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill orange" style="width:71%"></div></div><span class="bar-val">10ms</span></div></td>
+          <td style="font-size:12px;color:var(--text-secondary)">~2.40k</td>
+          <td style="font-size:12px;color:var(--text-secondary)">General chains, wide ecosystem</td>
+        </tr>
+        <tr>
+          <td>LangGraph</td>
+          <td>~14 ms</td>
+          <td class="bar-cell"><div class="bar-wrap"><div class="bar"><div class="bar-fill orange" style="width:100%"></div></div><span class="bar-val">14ms</span></div></td>
+          <td style="font-size:12px;color:var(--text-secondary)">~2.03k</td>
+          <td style="font-size:12px;color:var(--text-secondary)">Stateful agents, multi-actor</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/frameworks.md" style="color:var(--accent)">frameworks.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── COMBINATIONS ───────────────────────────────────── -->
+  <section class="research-section" id="combinations">
+    <h2>Best System Combinations by Use Case</h2>
+    <p class="section-sub">Production-grade stacks derived from benchmark evidence and architecture tradeoffs — not vendor preference.</p>
+
+    <div class="combo-grid">
+
+      <div class="combo-card">
+        <h3>Enterprise Knowledge Base</h3>
+        <p class="combo-problem">Large org, many departments, thousands of docs, multiple access levels.</p>
+        <div class="combo-stack">
+          <div class="combo-row"><span class="layer">Embedding</span><span class="pick">text-embedding-3-large or voyage-3-large</span></div>
+          <div class="combo-row"><span class="layer">Indexing</span><span class="pick">Hierarchical + Contextual Retrieval</span></div>
+          <div class="combo-row"><span class="layer">Retrieval</span><span class="pick">Hybrid BM25 + dense + metadata filter</span></div>
+          <div class="combo-row"><span class="layer">Reranking</span><span class="pick">BGE-v2-M3 or Cohere Rerank 3.5</span></div>
+          <div class="combo-row"><span class="layer">Vector DB</span><span class="pick">Qdrant (self-hosted) or Weaviate</span></div>
+          <div class="combo-row"><span class="layer">Memory</span><span class="pick">Mem0 per-user</span></div>
+          <div class="combo-row"><span class="layer">Framework</span><span class="pick">LlamaIndex + LangGraph agents</span></div>
+        </div>
+        <div class="combo-note">Critical: policy enforcement at retrieval time, not post-retrieval. User A must never see User B's documents.</div>
+      </div>
+
+      <div class="combo-card">
+        <h3>Customer Support / FAQ</h3>
+        <p class="combo-problem">Many users, repetitive questions, per-user context, response consistency critical.</p>
+        <div class="combo-stack">
+          <div class="combo-row"><span class="layer">Embedding</span><span class="pick">text-embedding-3-small</span></div>
+          <div class="combo-row"><span class="layer">Indexing</span><span class="pick">Fixed 256–512 tokens + QA pair index</span></div>
+          <div class="combo-row"><span class="layer">Retrieval</span><span class="pick">Hybrid — BM25 catches error codes exactly</span></div>
+          <div class="combo-row"><span class="layer">Reranking</span><span class="pick">MixedBread base-v2 (fast)</span></div>
+          <div class="combo-row"><span class="layer">Memory</span><span class="pick">Mem0 or Zep per-customer</span></div>
+          <div class="combo-row"><span class="layer">Framework</span><span class="pick">LangGraph stateful multi-turn</span></div>
+          <div class="combo-row"><span class="layer">Evaluation</span><span class="pick">RAGAS faithfulness in CI/CD</span></div>
+        </div>
+        <div class="combo-note">Two users asking the same question must get equivalent answers.</div>
+      </div>
+
+      <div class="combo-card">
+        <h3>Code Search / Dev Assistant</h3>
+        <p class="combo-problem">Developers querying a codebase for functions, patterns, or documentation.</p>
+        <div class="combo-stack">
+          <div class="combo-row"><span class="layer">Embedding</span><span class="pick">Voyage code-3 (+4–8 Recall@10)</span></div>
+          <div class="combo-row"><span class="layer">Indexing</span><span class="pick">AST-aware function/class chunks (Tree-sitter)</span></div>
+          <div class="combo-row"><span class="layer">Retrieval</span><span class="pick">Hybrid — dense + BM25 for API names</span></div>
+          <div class="combo-row"><span class="layer">Reranking</span><span class="pick">Cross-encoder fine-tuned on code</span></div>
+          <div class="combo-row"><span class="layer">Vector DB</span><span class="pick">Qdrant or pgvector</span></div>
+          <div class="combo-row"><span class="layer">Framework</span><span class="pick">LlamaIndex ingestion + custom query</span></div>
+        </div>
+        <div class="combo-note">Use Tree-sitter AST chunking for clean function/class boundaries — never line-count splitting.</div>
+      </div>
+
+      <div class="combo-card">
+        <h3>Legal / Contract Review</h3>
+        <p class="combo-problem">Lawyers querying large doc sets. Exact citation accuracy mandatory. Access control by matter/client.</p>
+        <div class="combo-stack">
+          <div class="combo-row"><span class="layer">Embedding</span><span class="pick">voyage-3-large or Cohere embed-v4</span></div>
+          <div class="combo-row"><span class="layer">Indexing</span><span class="pick">Clause-level semantic + summary indexing</span></div>
+          <div class="combo-row"><span class="layer">Retrieval</span><span class="pick">Hybrid strong — legal citations exact-match</span></div>
+          <div class="combo-row"><span class="layer">Graph RAG</span><span class="pick">Cross-contract entity relationships</span></div>
+          <div class="combo-row"><span class="layer">Vector DB</span><span class="pick">Qdrant or Weaviate with row-level security</span></div>
+          <div class="combo-row"><span class="layer">Evaluation</span><span class="pick">Human review mandatory</span></div>
+        </div>
+        <div class="combo-note">Automated RAGAS metrics are insufficient. Errors have legal consequences.</div>
+      </div>
+
+      <div class="combo-card">
+        <h3>Personal Knowledge Management</h3>
+        <p class="combo-problem">Single user, personal notes corpus, want to query their own thinking.</p>
+        <div class="combo-stack">
+          <div class="combo-row"><span class="layer">Embedding</span><span class="pick">text-embedding-3-small (cost-efficient)</span></div>
+          <div class="combo-row"><span class="layer">Indexing</span><span class="pick">Note-level + atomic claim extraction</span></div>
+          <div class="combo-row"><span class="layer">Graph RAG</span><span class="pick">High ROI — personal knowledge is networked</span></div>
+          <div class="combo-row"><span class="layer">Vector DB</span><span class="pick">pgvector or ChromaDB (small scale)</span></div>
+          <div class="combo-row"><span class="layer">Memory</span><span class="pick">Lightweight custom episodic store</span></div>
+          <div class="combo-row"><span class="layer">Framework</span><span class="pick">Custom or LlamaIndex</span></div>
+        </div>
+        <div class="combo-note">Graph RAG uniquely valuable here. Zettelkasten notes reference each other — graph makes links queryable.</div>
+      </div>
+
+      <div class="combo-card" style="border-color: #1f6feb;">
+        <h3>EPC / Engineering Docs <span class="badge badge-blue" style="font-size:10px;vertical-align:middle;">NEXUS domain</span></h3>
+        <p class="combo-problem">P&IDs, data sheets, SOPs, revision-controlled drawings, multilingual teams in SEA.</p>
+        <div class="combo-stack">
+          <div class="combo-row"><span class="layer">Embedding</span><span class="pick">Cohere embed-v4 (multimodal) or multilingual-e5</span></div>
+          <div class="combo-row"><span class="layer">Retrieval</span><span class="pick">Hybrid — strong BM25 for instrument tags</span></div>
+          <div class="combo-row"><span class="layer">Exact search</span><span class="pick">SQLite FTS5 for tags, part numbers, POs</span></div>
+          <div class="combo-row"><span class="layer">Graph RAG</span><span class="pick">Equipment hierarchy graph</span></div>
+          <div class="combo-row"><span class="layer">Vector DB</span><span class="pick">Qdrant (complex metadata filtering)</span></div>
+          <div class="combo-row"><span class="layer">Revision</span><span class="pick">TTL invalidation + timestamp filter</span></div>
+        </div>
+        <div class="combo-note">AT-201 ≠ AT-202. Dense alone cannot distinguish instrument tags — exact hybrid index is non-negotiable.</div>
+      </div>
+
+      <div class="combo-card">
+        <h3>Healthcare / Medical Records</h3>
+        <p class="combo-problem">Clinical queries, patient history, multilingual, PHI/PII compliance mandatory.</p>
+        <div class="combo-stack">
+          <div class="combo-row"><span class="layer">Embedding</span><span class="pick">BioMedBERT or fine-tuned voyage-3</span></div>
+          <div class="combo-row"><span class="layer">Indexing</span><span class="pick">Section-level SOAP/CCD + UMLS concepts</span></div>
+          <div class="combo-row"><span class="layer">Graph RAG</span><span class="pick">Multi-hop clinical reasoning</span></div>
+          <div class="combo-row"><span class="layer">Compliance</span><span class="pick">PHI/PII filter at indexing time</span></div>
+          <div class="combo-row"><span class="layer">Evaluation</span><span class="pick">Clinical expert review loops mandatory</span></div>
+        </div>
+        <div class="combo-note">Hallucination is life-safety-relevant. Source citation + clinical expert review is mandatory, not optional.</div>
+      </div>
+
+    </div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--text-primary);margin:36px 0 12px;">Minimal Viable Stack (Any Domain)</h3>
+    <div class="decision-tree">
+1. Fixed-size chunking (512 tokens, 10% overlap)
+2. Embedding: text-embedding-3-large (commercial) or BGE-M3 (self-hosted)
+3. Vector store: pgvector or ChromaDB (dev) → Qdrant (production)
+4. Hybrid retrieval: BM25 + dense + RRF
+5. Reranking: MixedBread base-v2
+6. Framework: LlamaIndex
+
+<span class="q">Upgrade path:</span>
+→ <span class="a">Add Contextual Retrieval</span>         (immediate quality boost, +35% failure reduction)
+→ <span class="a">Switch to hierarchical indexing</span>  (for multi-section documents)
+→ <span class="a">Add Mem0 or Zep</span>                  (for multi-turn agents)
+→ <span class="a">Add Graph RAG</span>                     (for entity relationships and global queries)
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Full details: <a href="docs/research/combinations.md" style="color:var(--accent)">combinations.md</a></p>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- ── MATURITY MATRIX ───────────────────────────────── -->
+  <section class="research-section" id="maturity">
+    <h2>Technology Maturity Matrix</h2>
+    <p class="section-sub">Production readiness as of 2026. "Stable" means battle-tested at scale. "Research" means promising but not production-grade.</p>
+
+    <div class="maturity-grid">
+
+      <div class="maturity-card">
+        <h4>Hybrid Retrieval (BM25 + Dense)</h4>
+        <div class="maturity-level level-stable">Stable</div>
+        <div class="maturity-desc">De facto standard. All major vector DBs support it natively (Weaviate, Qdrant) or via external BM25 (Elasticsearch, OpenSearch). No production reason to use dense-only.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>Cross-encoder Reranking</h4>
+        <div class="maturity-level level-stable">Stable</div>
+        <div class="maturity-desc">Proven quality multiplier. MixedBread, BGE, Cohere all have production-ready APIs and self-hosted options. Standard in any quality-focused pipeline.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>Contextual Retrieval</h4>
+        <div class="maturity-level level-stable">Stable</div>
+        <div class="maturity-desc">Anthropic Sep 2024 technique: prepend chunk-level context before embedding. Well-benchmarked (35–67% failure reduction). Production-ready with any LLM.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>LlamaIndex / LangGraph</h4>
+        <div class="maturity-level level-stable">Stable</div>
+        <div class="maturity-desc">Both are production-grade with extensive adoption. LlamaIndex leads for RAG; LangGraph for stateful agents. LangGraph 0.2+ has stable API.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>Qdrant / pgvector</h4>
+        <div class="maturity-level level-stable">Stable</div>
+        <div class="maturity-desc">Both in broad production use. Qdrant 1.10+ stable. pgvector + pgvectorscale closes the performance gap vs. purpose-built databases for &lt;100M vectors.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>Mem0 / Zep Memory</h4>
+        <div class="maturity-level level-growing">Growing</div>
+        <div class="maturity-desc">Both have production-grade managed and self-hosted options. Mem0 widely integrated. Zep+Graphiti gaining enterprise adoption for temporal agent memory.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>LightRAG / Graph RAG</h4>
+        <div class="maturity-level level-growing">Growing</div>
+        <div class="maturity-desc">Microsoft GraphRAG production-ready but expensive. LightRAG emerging fast. LlamaIndex PropertyGraph stable. Real production deployments increasing in 2025–2026.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>BGE-M3 Tri-mode</h4>
+        <div class="maturity-level level-growing">Growing</div>
+        <div class="maturity-desc">Unique: one model for dense + sparse + ColBERT. Increasingly used in production. Sparse and multi-vector index support varies by vector DB.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>Multimodal Embeddings (Cohere v4)</h4>
+        <div class="maturity-level level-growing">Growing</div>
+        <div class="maturity-desc">Cohere embed-v4 is the most production-ready multimodal embedding model. GPT-4o embeddings maturing. Use cases: engineering drawings + text retrieval.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>DSPy Optimization</h4>
+        <div class="maturity-level level-emerging">Emerging</div>
+        <div class="maturity-desc">Powerful for prompt optimization but observability, cost tracking, and deployment tooling explicitly listed as roadmap gaps. Not yet suitable for ops-heavy production.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>Haystack v2 Pipelines</h4>
+        <div class="maturity-level level-growing">Growing</div>
+        <div class="maturity-desc">Declarative YAML-serializable pipelines with best-in-class token efficiency. Strong in European enterprise. Less ecosystem adoption than LlamaIndex/LangChain.</div>
+      </div>
+
+      <div class="maturity-card">
+        <h4>Agentic RAG (multi-step)</h4>
+        <div class="maturity-level level-emerging">Emerging</div>
+        <div class="maturity-desc">ReAct + tool use + RAG loops have strong research backing. Production deployments increasing but reliability at scale (error recovery, cost) still an open problem.</div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:24px;font-size:12px;">
+      <span><span class="level-stable" style="font-weight:700;">●</span> Stable — battle-tested, use in production without hesitation</span>
+      <span><span class="level-growing" style="font-weight:700;">●</span> Growing — proven results, some rough edges in ops/tooling</span>
+      <span><span class="level-emerging" style="font-weight:700;">●</span> Emerging — strong promise, evaluate carefully before committing</span>
+      <span><span class="level-research" style="font-weight:700;">●</span> Research — not production-ready</span>
+    </div>
+  </section>
+
+  <hr class="rdivider">
+
+  <!-- Footer links -->
+  <div style="padding: 24px 0 48px; display:flex; gap: 24px; flex-wrap: wrap; align-items: center;">
+    <a href="index.html" style="color:var(--text-secondary);font-size:13px;text-decoration:none;">← Back to NEXUS</a>
+    <a href="docs/research/INDEX.md" style="color:var(--accent);font-size:13px;text-decoration:none;">Open Research Index (Obsidian)</a>
+    <a href="docs/research/combinations.md" style="color:var(--accent);font-size:13px;text-decoration:none;">combinations.md</a>
+    <a href="docs/research/evaluation.md" style="color:var(--accent);font-size:13px;text-decoration:none;">evaluation.md</a>
+    <span style="color:var(--text-muted);font-size:12px;">Research last updated: 2026-05-30</span>
+  </div>
+
+</main>
+</body>
+</html>
